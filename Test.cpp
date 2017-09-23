@@ -1,7 +1,7 @@
 #include <type_traits>
 
-#include "support.hpp"
-#include "grammar.hpp"
+#include "Support.hpp"
+#include "Grammar.hpp"
 
 // Non-terminal
 struct Expr;
