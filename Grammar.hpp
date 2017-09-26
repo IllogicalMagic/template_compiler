@@ -27,38 +27,39 @@ template<typename S, typename L>
 struct MatchSeq;
 
 // Match sequence helper
-template<typename Sym, typename Tok, typename P, typename L>
+template<typename Sym, typename TokType, typename Tok, typename P, typename L>
 struct MatchSeqSelect {
   using Value = False;
   using Rest = List<Tok, L>;
 };
 
 // Match terminal -- simplest case
-template<typename Tok>
-struct MatchSeqSelect<Terminal<Tok>, Tok, Nil, Nil> {
+template<typename TokType, typename Tok>
+struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, Nil, Nil> {
   using Value = True;
   using Rest = Nil;
 };
 
-template<typename Tok, typename R>
-struct MatchSeqSelect<Terminal<Tok>, Tok, R, Nil> {
+template<typename TokType, typename Tok, typename R>
+struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, R, Nil> {
   using IM = MatchSeq<R, Nil>;
   using Value = typename IM::Value;
   using Rest = Nil;
 };
 
 // Match last terminal in the rule
-template<typename Tok, typename L>
-struct MatchSeqSelect<Terminal<Tok>, Tok, Nil, L> {
+template<typename TokType, typename Tok, typename L>
+struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, Nil, L> {
   using Value = True;
   using Rest = L;
 };
 
 // Match terminal in the middle of the rule
-template<typename Tok, typename P, typename L>
-struct MatchSeqSelect<Terminal<Tok>, Tok, P, L> {
+template<typename TokType, typename Tok, typename P, typename L>
+struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, P, L> {
   using IM = MatchSeqSelect<
     typename P::Head::Type,
+    typename L::Head::Type,
     typename L::Head,
     typename P::Tail,
     typename L::Tail>;
@@ -68,8 +69,8 @@ struct MatchSeqSelect<Terminal<Tok>, Tok, P, L> {
 // Match terminal end
 
 // Match non-terminal in the middle of the rule
-template<typename N, typename Prod, typename Tok, typename P, typename L>
-struct MatchSeqSelect<NonTerminal<N, Prod>, Tok, P, L> {
+template<typename N, typename Prod, typename TokType, typename Tok, typename P, typename L>
+struct MatchSeqSelect<NonTerminal<N, Prod>, TokType, Tok, P, L> {
   using Expand =
     // Do not need to pass List<Nil, Nil> if we at the end of input,
     // Only Nil should be passed as empty input.
@@ -92,6 +93,7 @@ template<typename P, typename L>
 struct MatchSeq {
   using IM = MatchSeqSelect<
     typename P::Head::Type,
+    typename L::Head::Type,
     typename L::Head,
     typename P::Tail,
     typename L::Tail>;
@@ -104,6 +106,7 @@ template<typename P>
 struct MatchSeq<P, Nil> {
   using IM = MatchSeqSelect<
     typename P::Head::Type,
+    Nil,
     Nil,
     typename P::Tail,
     Nil>;

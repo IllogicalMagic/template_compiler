@@ -37,7 +37,11 @@ DEF_NTERM(Factor, OneOf<CreateList<
           Seq<CreateList<LBr, Expr, RBr>>>>);
 
 using S = Seq<CreateList<Expr>>;
-using L = CreateList<Num, Plus, LBr, Num, Plus, Num, RBr, Mul, Num>;
+
+CREATE_TOKEN(TokNum1, Num, 1);
+CREATE_TOKEN(TokNum3, Num, 3);
+CREATE_TOKEN(TokPlus, Plus, NoValue);
+using L = CreateList<TokNum1, TokPlus, TokNum3>;
 
 int main() {
   static_assert(std::is_same<True, typename Parse<S, L>::Value>::value, "Match fail");
