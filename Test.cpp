@@ -1,6 +1,7 @@
 #include <type_traits>
 
 #include "Support.hpp"
+#include "List.hpp"
 #include "Grammar.hpp"
 #include "GrammarBuilder.hpp"
 
@@ -95,6 +96,7 @@ CREATE_TOKEN(TokMul, Mul, NoValue);
 CREATE_TOKEN(TokLBr, LBr, NoValue);
 CREATE_TOKEN(TokRBr, RBr, NoValue);
 
+// (1 + 3) * 3 == 12
 using L = CreateList<TokLBr, TokNum1, TokPlus, TokNum3, TokRBr, TokMul, TokNum3>;
 
 int main() {

@@ -1,9 +1,8 @@
 #ifndef GRAMMAR_GRAMMAR_HPP_INCLUDED
 #define GRAMMAR_GRAMMAR_HPP_INCLUDED
 
-#include <type_traits>
-
 #include "Support.hpp"
+#include "List.hpp"
 
 // Basic grammar types
 template<typename T>
