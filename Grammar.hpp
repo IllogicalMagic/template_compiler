@@ -29,29 +29,33 @@ struct MatchSeq;
 // Match sequence helper
 template<typename Sym, typename TokType, typename Tok, typename P, typename L>
 struct MatchSeqSelect {
-  using Value = False;
+  using State = False;
   using Rest = List<Tok, L>;
+  using Value = Nil;
 };
 
 // Match terminal -- simplest case
 template<typename TokType, typename Tok>
 struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, Nil, Nil> {
-  using Value = True;
+  using State = True;
   using Rest = Nil;
+  using Value = CreateList<Tok>;
 };
 
 template<typename TokType, typename Tok, typename R>
 struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, R, Nil> {
   using IM = MatchSeq<R, Nil>;
-  using Value = typename IM::Value;
+  using State = typename IM::State;
   using Rest = Nil;
+  using Value = List<Tok, typename IM::Value>;
 };
 
 // Match last terminal in the rule
 template<typename TokType, typename Tok, typename L>
 struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, Nil, L> {
-  using Value = True;
+  using State = True;
   using Rest = L;
+  using Value = CreateList<Tok>;
 };
 
 // Match terminal in the middle of the rule
@@ -63,8 +67,9 @@ struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, P, L> {
     typename L::Head,
     typename P::Tail,
     typename L::Tail>;
-  using Value = typename IM::Value;
+  using State = typename IM::State;
   using Rest  = typename IM::Rest;
+  using Value = List<Tok, typename IM::Value>;
 };
 // Match terminal end
 
@@ -79,12 +84,13 @@ struct MatchSeqSelect<NonTerminal<N, Prod>, TokType, Tok, P, L> {
   using NextMatch = MatchSeq<P, TokRest>;
 
   using IM = typename If<
-    typename Expand::Value,
+    typename Expand::State,
     NextMatch,
     Expand>::Value;
 
-  using Value = typename IM::Value;
+  using State = typename IM::State;
   using Rest  = typename IM::Rest;
+  using Value = List<typename Expand::Value, typename NextMatch::Value>;
 };
 // Match non-terminal end
 
@@ -97,8 +103,9 @@ struct MatchSeq {
     typename L::Head,
     typename P::Tail,
     typename L::Tail>;
-  using Value = typename IM::Value;
+  using State = typename IM::State;
   using Rest  = typename IM::Rest;
+  using Value = typename IM::Value;
 };
 
 // Corner cases.
@@ -110,49 +117,50 @@ struct MatchSeq<P, Nil> {
     Nil,
     typename P::Tail,
     Nil>;
-  using Value = typename IM::Value;
+  using State = typename IM::State;
   using Rest  = typename IM::Rest;
+  using Value = typename IM::Value;
 };
 
 template<typename L>
 struct MatchSeq<Nil, L> {
-  using Value = True;
+  using State = True;
   using Rest  = L;
+  using Value = Nil;
 };
 
 template<>
 struct MatchSeq<Nil, Nil> {
-  using Value = True;
+  using State = True;
   using Rest = Nil;
+  using Value = Nil;
 };
 // Corner cases end
 
 // List of sequences one of which should be matched
 template<typename L>
-struct OneOf {
-  using Variants = L;
-};
+struct OneOf {};
 
 // Simple sequence of terminals and non-terminals
-template<typename S>
-struct Seq {
-  using Value = S;
-};
+template<typename S, template<typename> typename A>
+struct Seq {};
 
 // Match rule
 // Match sequence
-template<typename S, typename L>
-struct Match<Seq<S>, L> {
+template<typename S, template<typename> typename A, typename L>
+struct Match<Seq<S, A>, L> {
   using M = MatchSeq<S, L>;
-  using Value = typename M::Value;
+  using State = typename M::State;
   using Rest  = typename M::Rest;
+  using Value = A<typename M::Value>;
 };
 
 // Match empty rule
-template<typename L>
-struct Match<Seq<Empty>, L> {
-  using Value = True;
+template<template<typename> typename A, typename L>
+struct Match<Seq<Empty, A>, L> {
+  using State = True;
   using Rest  = L;
+  using Value = A<Nil>;
 };
 
 // Match one of rules
@@ -160,18 +168,21 @@ template<typename O, typename L>
 struct Match<OneOf<O>, L> {
   using M = Match<typename O::Head, L>;
   using Res = typename If<
-    typename M::Value,
+    typename M::State,
     M,
     Match<OneOf<typename O::Tail>, L>>::Value;
-  using Value = typename Res::Value;
+
+  using State = typename Res::State;
   using Rest = typename Res::Rest;
+  using Value = typename Res::Value;
 };
 
 // Match one of rules fail
 template<typename L>
 struct Match<OneOf<Nil>, L> {
-  using Value = False;
+  using State = False;
   using Rest = L;
+  using Value = void;
 };
 // Match end
 
@@ -181,13 +192,14 @@ struct Match<OneOf<Nil>, L> {
 template<typename S, typename L>
 struct Parse {
   using M = Match<S, L>;
-  using Value = typename If<
-    typename M::Value,
+  using State = typename If<
+    typename M::State,
     typename If<
       typename Equal<typename M::Rest, Nil>::Value,
       True,
       False>::Value,
     False>::Value;
+  using Value = typename M::Value;
 };
 
 #endif
