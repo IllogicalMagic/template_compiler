@@ -11,21 +11,26 @@ struct Terminal;
 template<typename N, typename Prod>
 struct NonTerminal;
 
-// Empty rule
+// Empty rule {{
 struct EmptyInt {
   using Type = Terminal<Nil>;
 };
 
 using Empty = CreateList<EmptyInt>;
-// Empty end
+// }}
 
-// Match sequence of tokens
+// Match sequence of tokens {{
 template<typename S, typename L>
 struct Match;
 template<typename S, typename L>
 struct MatchSeq;
 
-// Match sequence helper
+// Match sequence helper {{
+// Sym - symbol
+// TokType - token type
+// Tok - token
+// P - rest of symbols
+// L - rest of tokens
 template<typename Sym, typename TokType, typename Tok, typename P, typename L>
 struct MatchSeqSelect {
   using State = False;
@@ -33,7 +38,8 @@ struct MatchSeqSelect {
   using Value = Nil;
 };
 
-// Match terminal -- simplest case
+// Match terminal {{
+// Simplest case -- end of input
 template<typename TokType, typename Tok>
 struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, Nil, Nil> {
   using State = True;
@@ -70,7 +76,7 @@ struct MatchSeqSelect<Terminal<TokType>, TokType, Tok, P, L> {
   using Rest  = typename IM::Rest;
   using Value = List<Tok, typename IM::Value>;
 };
-// Match terminal end
+// }} Match terminal
 
 // Match non-terminal in the middle of the rule
 template<typename N, typename Prod, typename TokType, typename Tok, typename P, typename L>
@@ -91,9 +97,9 @@ struct MatchSeqSelect<NonTerminal<N, Prod>, TokType, Tok, P, L> {
   using Rest  = typename IM::Rest;
   using Value = List<typename Expand::Value, typename NextMatch::Value>;
 };
-// Match non-terminal end
+// }} Match sequence helper end
 
-// Match sequence of terminals and non-terminals
+// Match sequence of terminals and non-terminals {{
 template<typename P, typename L>
 struct MatchSeq {
   using IM = MatchSeqSelect<
@@ -107,7 +113,7 @@ struct MatchSeq {
   using Value = typename IM::Value;
 };
 
-// Corner cases.
+// Corner cases {{
 template<typename P>
 struct MatchSeq<P, Nil> {
   using IM = MatchSeqSelect<
@@ -134,17 +140,19 @@ struct MatchSeq<Nil, Nil> {
   using Rest = Nil;
   using Value = Nil;
 };
-// Corner cases end
+// }} Corner cases end
+// }} Match sequence end
 
 // List of sequences one of which should be matched
 template<typename L>
 struct OneOf {};
 
 // Simple sequence of terminals and non-terminals
+// S - list of symbols, A - action to apply
 template<typename S, template<typename> typename A>
 struct Seq {};
 
-// Match rule
+// Match rule {{
 // Match sequence
 template<typename S, template<typename> typename A, typename L>
 struct Match<Seq<S, A>, L> {
@@ -183,7 +191,7 @@ struct Match<OneOf<Nil>, L> {
   using Rest = L;
   using Value = void;
 };
-// Match end
+// }} Match rule end
 
 // Main parse function.
 // S is start symbol of grammar,

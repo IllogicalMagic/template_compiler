@@ -3,19 +3,27 @@
 
 #include "Grammar.hpp"
 
+// Define terminal with name XT
 #define DEF_TERM(XT)                            \
   struct XT {                                   \
     using Type = Terminal<XT>;                  \
   };
 
+// Define non-terminal
+// Params:
+// Name, Production (Seq or OneOf), Action
 #define DEF_NTERM(XT, ...)                      \
   struct XT {                                   \
     using Type = NonTerminal<XT, __VA_ARGS__ >; \
   };
 
+// Token without any value
+struct NoValue;
+
+// Some helpers for token creation {{
+// Wrapper for tokens with object value (like 1)
 template<auto T>
 struct TokNoTypeVal;
-struct NoValue;
 
 template<typename T>
 auto DeduceTokValueType() -> T;
@@ -38,7 +46,9 @@ struct TokInternal<TokNoTypeVal<T>> {
 
 template<>
 struct TokInternal<NoValue> {};
+// }}
 
+// Create token TOK of type TYPE with value VALUE
 #define CREATE_TOKEN(TOK, TYPE, VALUE)                                  \
   struct TOK :                                                          \
     TokInternal<decltype(DeduceTokValueType<VALUE>())> {                \
