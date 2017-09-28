@@ -9,6 +9,19 @@
     using Type = Terminal<XT>;                  \
   };
 
+template<typename T>
+struct TermWrapper {
+  using Type = T;
+};
+
+template<typename X>
+struct TerminalizeImpl {
+  using Value = TermWrapper<Terminal<X>>;
+};
+
+template<typename X>
+using Terminalize = typename TerminalizeImpl<X>::Value;
+
 // Define non-terminal
 // Params:
 // Name, Production (Seq or OneOf), Action
