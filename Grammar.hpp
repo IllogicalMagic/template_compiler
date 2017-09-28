@@ -3,6 +3,7 @@
 
 #include "Support.hpp"
 #include "List.hpp"
+#include "Types.hpp"
 
 // Basic grammar types
 template<typename T>
@@ -98,7 +99,7 @@ struct MatchSeqSelect<NonTerminal<N, Prod>, TokType, Tok, P, L> {
 
   using State = typename IM::State;
   using Rest  = typename IM::Rest;
-  using Value = List<typename Expand::Value, typename NextMatch::Value>;
+  using Value = List<typename Expand::Value, typename IM::Value>;
 };
 // }} Match sequence helper end
 
