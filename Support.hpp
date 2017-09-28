@@ -3,6 +3,19 @@
 
 #include "Types.hpp"
 
+template<bool>
+struct ToBoolImpl {
+  using Value = True;
+};
+
+template<>
+struct ToBoolImpl<false> {
+  using Value = False;
+};
+
+template<bool B>
+using ToBool = typename ToBoolImpl<B>::Value;
+
 // Equality test
 template<typename T, typename U>
 struct Equal {
