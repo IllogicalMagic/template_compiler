@@ -27,15 +27,15 @@ DEF_TERM(RBr);
 
 template<typename Vals>
 struct PlusAction {
-  using Lhs = typename Vals::Head;
-  using Rhs = typename Vals::Tail::Head;
+  using Lhs = Get<Vals, 0>;
+  using Rhs = Get<Vals, 1>;
   static constexpr decltype(Lhs::Value) Value = Lhs::Value + Rhs::Value;
 };
 
 template<typename Vals>
 struct PlusRestAction {
-  using Lhs = typename Vals::Tail::Head;
-  using Rhs = typename Vals::Tail::Tail::Head;
+  using Lhs = Get<Vals, 1>;
+  using Rhs = Get<Vals, 2>;
   static constexpr decltype(Lhs::Value) Value = Lhs::Value + Rhs::Value;
 };
 
@@ -46,15 +46,15 @@ struct PlusZero {
 
 template<typename Vals>
 struct MulAction {
-  using Lhs = typename Vals::Head;
-  using Rhs = typename Vals::Tail::Head;
+  using Lhs = Get<Vals, 0>;
+  using Rhs = Get<Vals, 1>;
   static constexpr decltype(Lhs::Value) Value = Lhs::Value * Rhs::Value;
 };
 
 template<typename Vals>
 struct MulRestAction {
-  using Lhs = typename Vals::Tail::Head;
-  using Rhs = typename Vals::Tail::Tail::Head;
+  using Lhs = Get<Vals, 1>;
+  using Rhs = Get<Vals, 2>;
   static constexpr decltype(Lhs::Value) Value = Lhs::Value * Rhs::Value;
 };
 
@@ -65,13 +65,13 @@ struct MulOne {
 
 template<typename Vals>
 struct NumAction {
-  using Val = typename Vals::Head;
+  using Val = Get<Vals, 0>;
   static constexpr decltype(Val::Value) Value = Val::Value;
 };
 
 template<typename Vals>
 struct BracedAction {
-  using Val = typename Vals::Tail::Head;
+  using Val = Get<Vals, 1>;
   static constexpr decltype(Val::Value) Value = Val::Value;
 };
 
