@@ -29,14 +29,14 @@ template<typename Vals>
 struct PlusAction {
   using Lhs = Get<Vals, 0>;
   using Rhs = Get<Vals, 1>;
-  static constexpr decltype(Lhs::Value) Value = Lhs::Value + Rhs::Value;
+  static constexpr auto Value = Lhs::Value + Rhs::Value;
 };
 
 template<typename Vals>
 struct PlusRestAction {
   using Lhs = Get<Vals, 1>;
   using Rhs = Get<Vals, 2>;
-  static constexpr decltype(Lhs::Value) Value = Lhs::Value + Rhs::Value;
+  static constexpr auto Value = Lhs::Value + Rhs::Value;
 };
 
 template<typename Vals>
@@ -48,14 +48,14 @@ template<typename Vals>
 struct MulAction {
   using Lhs = Get<Vals, 0>;
   using Rhs = Get<Vals, 1>;
-  static constexpr decltype(Lhs::Value) Value = Lhs::Value * Rhs::Value;
+  static constexpr auto Value = Lhs::Value * Rhs::Value;
 };
 
 template<typename Vals>
 struct MulRestAction {
   using Lhs = Get<Vals, 1>;
   using Rhs = Get<Vals, 2>;
-  static constexpr decltype(Lhs::Value) Value = Lhs::Value * Rhs::Value;
+  static constexpr auto Value = Lhs::Value * Rhs::Value;
 };
 
 template<typename Vals>
@@ -66,13 +66,13 @@ struct MulOne {
 template<typename Vals>
 struct NumAction {
   using Val = Get<Vals, 0>;
-  static constexpr decltype(Val::Value) Value = Val::Value;
+  static constexpr auto Value = Val::Value;
 };
 
 template<typename Vals>
 struct BracedAction {
   using Val = Get<Vals, 1>;
-  static constexpr decltype(Val::Value) Value = Val::Value;
+  static constexpr auto Value = Val::Value;
 };
 
 DEF_NTERM(Expr, Seq<CreateList<Term, ExprRest>, PlusAction>);

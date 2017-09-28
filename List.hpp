@@ -47,4 +47,18 @@ struct GetImpl<L, 0> {
 template<typename L, int N>
 using Get = typename GetImpl<L, N>::Value;
 
+template<typename L, template<typename> typename F>
+struct MapImpl {
+  using IM = typename F<typename L::Head>::Value;
+  using Value = List<IM, typename MapImpl<typename L::Tail, F>::Value>;
+};
+
+template<template<typename> typename F>
+struct MapImpl<Nil, F> {
+  using Value = Nil;
+};
+
+template<typename L, template<typename> typename F>
+using Map = typename MapImpl<L, F>::Value;
+
 #endif

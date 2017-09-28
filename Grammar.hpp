@@ -17,6 +17,9 @@ struct EmptyInt {
 };
 
 using Empty = CreateList<EmptyInt>;
+
+template<typename>
+struct NoAct;
 // }}
 
 // Match sequence of tokens {{
@@ -149,7 +152,7 @@ struct OneOf {};
 
 // Simple sequence of terminals and non-terminals
 // S - list of symbols, A - action to apply
-template<typename S, template<typename> typename A>
+template<typename S, template<typename X> typename A = NoAct>
 struct Seq {};
 
 // Match rule {{
