@@ -68,4 +68,10 @@ struct TokInternal<NoValue> {};
     using Type = TYPE;                                                  \
   };
 
+template<typename T, typename V>
+struct Token {
+  using Type = T;
+  using Value = V;
+};
+
 #endif

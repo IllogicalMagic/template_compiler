@@ -2,8 +2,11 @@
 #define TEMPLATE_LEXER_HPP_INCLUDED
 
 #include "Grammar.hpp"
-#include "Support.hpp"
 #include "GrammarBuilder.hpp"
+#include "StringDivide.hpp"
+#include "Support.hpp"
+
+// RegExp grammar builder {{
 
 struct Union;
 struct Closure;
@@ -25,6 +28,7 @@ struct ClExpr;
 struct ClExprRest;
 struct Primal;
 
+// Actions {{
 template<typename Vals>
 struct SymbolAct {
   using Val = Get<Vals, 0>;
@@ -107,6 +111,7 @@ template<typename Vals>
 struct Extract {
   using Value = Seq<CreateList<typename Get<Vals, 0>::Value>>;
 };
+// }} Actions
 
 DEF_NTERM(UExpr, Seq<CreateList<CExpr, UExprRest>, UExprAct>);
 DEF_NTERM(UExprRest, OneOf<CreateList<
@@ -125,5 +130,97 @@ DEF_NTERM(Primal, OneOf<CreateList<
           Seq<CreateList<Symbol>, SymbolAct>>>);
 
 using RegExp = Seq<CreateList<UExpr>, Extract>;
+
+// }} RegExp grammar builder
+
+// RegExp tokenizer {{
+
+template<typename T>
+struct TokenizeRegExpCharImpl {
+  using Value = Token<Symbol, T>;
+};
+
+template<>
+struct TokenizeRegExpCharImpl<Const<'|'> > {
+  using Value = Token<Union, NoValue>;
+};
+
+template<>
+struct TokenizeRegExpCharImpl<Const<'*'> > {
+  using Value = Token<Closure, NoValue>;
+};
+
+template<>
+struct TokenizeRegExpCharImpl<Const<'('> > {
+  using Value = Token<LBr, NoValue>;
+};
+
+template<>
+struct TokenizeRegExpCharImpl<Const<')'> > {
+  using Value = Token<RBr, NoValue>;
+};
+
+template<typename T>
+using TokenizeRegExpChar = typename TokenizeRegExpCharImpl<T>::Value;
+
+template<typename T>
+struct TokenizeRegExpEscImpl {
+  using Value = Token<Symbol, T>;
+};
+
+template<typename T>
+using TokenizeRegExpEsc = typename TokenizeRegExpEscImpl<T>::Value;
+
+template<typename L>
+struct TokenizeRegExpImpl;
+
+template<typename C, typename R>
+struct TokenizeRegExpImpl<List<C, R> > {
+  using IM = TokenizeRegExpChar<C>;
+  using Rest = typename TokenizeRegExpImpl<R>::Value;
+  using Value = List<IM, Rest>;
+};
+
+template<typename C, typename R>
+struct TokenizeRegExpImpl<List<Const<'\\'>, List<C, R> > > {
+  using IM = TokenizeRegExpEsc<C>;
+  using Rest = typename TokenizeRegExpImpl<R>::Value;
+  using Value = List<IM, Rest>;
+};
+
+template<>
+struct TokenizeRegExpImpl<Nil> {
+  using Value = Nil;
+};
+
+template<typename T>
+using TokenizeRegExp = typename TokenizeRegExpImpl<T>::Value;
+
+// }} RegExp tokenizer
+
+// RegExp creator {{
+
+template<typename Parsed>
+struct CheckRE {
+  static constexpr bool State = std::is_same<True, typename Parsed::State>::value;
+  static_assert(State == true, "Bad regexp");
+  static_assert(State == false, "Success");
+  using Value = typename Parsed::Value;
+};
+
+template<typename T>
+auto CreateRegExpImpl2() ->
+  typename CheckRE<Parse<RegExp, T> >::Value;
+
+template<typename T>
+auto CreateRegExpImpl1() ->
+  decltype(CreateRegExpImpl2<TokenizeRegExp<T> >());
+
+// tre -- template regular expression
+template<typename T, T... R>
+auto operator""_tre()
+  -> decltype(CreateRegExpImpl1<CreateList<Const<R>...> >());
+
+// }} RegExp creator
 
 #endif

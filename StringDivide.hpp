@@ -2,6 +2,7 @@
 #define STRING_DIVIDE_HPP_INCLUDED
 
 #include "List.hpp"
+#include "Types.hpp"
 
 #include <type_traits>
 #include <utility>
@@ -23,5 +24,8 @@
 #define DIVIDE_STRING(VAL, STR)                                 \
   typedef DIVIDE_STRING_HELPER(STR) VAL##Internal;              \
   using VAL = typename VAL##Internal::Value;
+
+template<typename T, T... S>
+auto operator ""_Str() -> CreateList<Const<S>...>;
 
 #endif

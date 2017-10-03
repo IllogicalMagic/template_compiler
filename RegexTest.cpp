@@ -2,7 +2,7 @@
 
 #include "Grammar.hpp"
 #include "GrammarBuilder.hpp"
-#include "Lex.hpp"
+#include "RegExp.hpp"
 #include "Types.hpp"
 
 struct X;
