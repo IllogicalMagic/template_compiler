@@ -2,6 +2,7 @@
 #define TEMPLATE_TOOLS_LIST_HPP_INCLUDED
 
 #include "Types.hpp"
+#include "Support.hpp"
 
 // List structure
 template<typename H, typename T>
@@ -94,5 +95,22 @@ struct Flatten<Nil> {
 
 template<typename L>
 using FlattenV = typename Flatten<L>::Value;
+
+template<typename L, template<typename> typename P>
+struct Filter {
+  using H = typename L::Head;
+  using T = typename L::Tail;
+  using IM = typename P<H>::Value;
+  using Rest = typename Filter<T, P>::Value;
+  using Value = typename If<IM, List<H, Rest>, Rest>::Value;
+};
+
+template<template<typename> typename P>
+struct Filter<Nil, P> {
+  using Value = Nil;
+};
+
+template<typename L, template<typename> typename P>
+using FilterV = typename Filter<L, P>::Value;
 
 #endif

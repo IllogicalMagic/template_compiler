@@ -16,6 +16,19 @@ struct ToBoolImpl<false> {
 template<bool B>
 using ToBool = typename ToBoolImpl<B>::Value;
 
+template<typename T>
+struct Not {
+  using Value = False;
+};
+
+template<>
+struct Not<False> {
+  using Value = True;
+};
+
+template<typename T>
+using NotV = typename Not<T>::Value;
+
 // Equality test
 template<typename T, typename U>
 struct Equal {

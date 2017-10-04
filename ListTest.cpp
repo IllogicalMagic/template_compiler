@@ -19,3 +19,14 @@ constexpr bool State2 = std::is_same<L8, L9>::value;
 static_assert(State2 == false, "Success!");
 static_assert(State2 == true, "Fail!");
 
+template<typename T>
+struct DelBool {
+  using Value = NotV<typename Equal<T, bool>::Value>;
+};
+
+using L11 = FilterV<L9, DelBool>;
+using L12 = CreateList<int, double, int>;
+constexpr bool State3 = std::is_same<L11, L12>::value;
+static_assert(State3 == false, "Success!");
+static_assert(State3 == true, "Fail!");
+
