@@ -26,11 +26,9 @@
   typedef DIVIDE_STRING_HELPER(STR) VAL##Internal;              \
   using VAL = typename VAL##Internal::Value;
 
-struct Symbol;
-
 template<typename T>
 struct TokenizeInCharImpl {
-  using Value = Token<Symbol, T>;
+  using Value = Token<T, NoValue>;
 };
 
 template<typename T>
@@ -38,7 +36,7 @@ using TokenizeInChar = typename TokenizeInCharImpl<T>::Value;
 
 template<typename T>
 struct TokenizeInEscImpl {
-  using Value = Token<Symbol, T>;
+  using Value = Token<T, NoValue>;
 };
 
 template<typename T>
@@ -69,9 +67,5 @@ struct TokenizeInImpl<Nil> {
 template<typename T, T... S>
 auto operator ""_tstr()
   -> typename TokenizeInImpl<CreateList<Const<S>...> >::Value;
-
-// template<typename T, T... S>
-// auto operator ""_tstr()
-//   -> typename TokenizeInImpl<CreateList<Const<S>...> >::Value;
 
 #endif

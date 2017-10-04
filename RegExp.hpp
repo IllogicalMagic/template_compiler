@@ -205,7 +205,7 @@ struct CheckRE {
   static constexpr bool State = std::is_same<True, typename Parsed::State>::value;
   static_assert(State == true, "Bad regexp");
   static_assert(State == false, "Success");
-  using Value = typename Parsed::Value;
+  using Value = typename Parsed::Value::Value;
 };
 
 template<typename T>
