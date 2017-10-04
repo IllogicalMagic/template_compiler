@@ -61,4 +61,38 @@ struct MapImpl<Nil, F> {
 template<typename L, template<typename> typename F>
 using Map = typename MapImpl<L, F>::Value;
 
+template<typename L, typename Rs>
+struct Append {
+  using Value = List<L, Rs>;
+};
+
+template<typename L, typename Ls, typename Rs>
+struct Append<List<L, Ls>, Rs> {
+  using IM = typename Append<Ls, Rs>::Value;
+  using Value = List<L, IM>;
+};
+
+template<typename Rest>
+struct Append<Nil, Rest> {
+  using Value = Rest;
+};
+
+template<typename T, typename U>
+using AppendV = typename Append<T, U>::Value;
+
+template<typename L>
+struct Flatten {
+  using H = typename L::Head;
+  using T = typename L::Tail;
+  using Value = AppendV<H, typename Flatten<T>::Value>;
+};
+
+template<>
+struct Flatten<Nil> {
+  using Value = Nil;
+};
+
+template<typename L>
+using FlattenV = typename Flatten<L>::Value;
+
 #endif
