@@ -1,5 +1,5 @@
-#ifndef TEMPLATE_LEXER_HPP_INCLUDED
-#define TEMPLATE_LEXER_HPP_INCLUDED
+#ifndef TEMPLATE_REGEXP_HPP_INCLUDED
+#define TEMPLATE_REGEXP_HPP_INCLUDED
 
 #include "Grammar.hpp"
 #include "GrammarBuilder.hpp"
@@ -108,9 +108,11 @@ struct UExprAct {
 };
 
 template<typename Vals>
-struct Extract {
-  using Value = Seq<CreateList<typename Get<Vals, 0>::Value>>;
+struct ExtractRE {
+  using Value = CreateList<typename Get<Vals, 0>::Value>;
 };
+
+
 // }} Actions
 
 DEF_NTERM(UExpr, Seq<CreateList<CExpr, UExprRest>, UExprAct>);
@@ -129,7 +131,7 @@ DEF_NTERM(Primal, OneOf<CreateList<
           Seq<CreateList<LBr, UExpr, RBr>, BracketAct>,
           Seq<CreateList<Symbol>, SymbolAct>>>);
 
-using RegExp = Seq<CreateList<UExpr>, Extract>;
+using RegExp = Seq<CreateList<UExpr>, ExtractRE>;
 
 // }} RegExp grammar builder
 

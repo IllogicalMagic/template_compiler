@@ -21,6 +21,11 @@ using Empty = CreateList<EmptyInt>;
 
 template<typename>
 struct NoAct;
+
+template<typename Vals>
+struct Extract {
+  using Value = typename Get<Vals, 0>::Value;
+};
 // }}
 
 // Match sequence of tokens {{
