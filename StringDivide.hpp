@@ -3,6 +3,7 @@
 
 #include "List.hpp"
 #include "Types.hpp"
+#include "GrammarBuilder.hpp"
 
 #include <type_traits>
 #include <utility>
@@ -25,7 +26,52 @@
   typedef DIVIDE_STRING_HELPER(STR) VAL##Internal;              \
   using VAL = typename VAL##Internal::Value;
 
+struct Symbol;
+
+template<typename T>
+struct TokenizeInCharImpl {
+  using Value = Token<Symbol, T>;
+};
+
+template<typename T>
+using TokenizeInChar = typename TokenizeInCharImpl<T>::Value;
+
+template<typename T>
+struct TokenizeInEscImpl {
+  using Value = Token<Symbol, T>;
+};
+
+template<typename T>
+using TokenizeInEsc = typename TokenizeInEscImpl<T>::Value;
+
+template<typename L>
+struct TokenizeInImpl;
+
+template<typename C, typename R>
+struct TokenizeInImpl<List<C, R> > {
+  using IM = TokenizeInChar<C>;
+  using Rest = typename TokenizeInImpl<R>::Value;
+  using Value = List<IM, Rest>;
+};
+
+template<typename C, typename R>
+struct TokenizeInImpl<List<Const<'\\'>, List<C, R> > > {
+  using IM = TokenizeInEsc<C>;
+  using Rest = typename TokenizeInImpl<R>::Value;
+  using Value = List<IM, Rest>;
+};
+
+template<>
+struct TokenizeInImpl<Nil> {
+  using Value = Nil;
+};
+
 template<typename T, T... S>
-auto operator ""_Str() -> CreateList<Const<S>...>;
+auto operator ""_tstr()
+  -> typename TokenizeInImpl<CreateList<Const<S>...> >::Value;
+
+// template<typename T, T... S>
+// auto operator ""_tstr()
+//   -> typename TokenizeInImpl<CreateList<Const<S>...> >::Value;
 
 #endif
