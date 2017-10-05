@@ -6,7 +6,7 @@
 
 #include <utility>
 
-struct NumTok;
+struct Num;
 
 template<typename L, auto N>
 struct MakeNum {
@@ -23,7 +23,15 @@ template<typename L>
 struct NumAction {
   using Tree = typename L::Head::Value;
   using Nums = FlattenV<Tree>;
-  using Value = TokenV<NumTok, MakeNum<Nums, 0>::Value>;
+  using Value = TokenV<Num, MakeNum<Nums, 0>::Value>;
+};
+
+template<typename T, typename V>
+struct MakeTokAction {
+  template<typename L>
+  struct Action {
+    using Value = Token<T, V>;
+  };
 };
 
 #endif

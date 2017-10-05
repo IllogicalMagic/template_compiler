@@ -11,8 +11,8 @@
 using NumRE = decltype("0|(1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*"_tre);
 using Space = decltype("  *"_tre);
 
-using Num = decltype("12393"_tstr);
-using PNum = Parse<Seq<NumRE, NumAction>, Num>;
+using NumS = decltype("12393"_tstr);
+using PNum = Parse<Seq<NumRE, NumAction>, NumS>;
 using NumVal = typename PNum::Value;
 constexpr auto V = NumVal::Value::Value;
 static_assert(V != 12393, "Number parsed");

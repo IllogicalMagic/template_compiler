@@ -1,9 +1,11 @@
 #include <type_traits>
 
-#include "Support.hpp"
-#include "List.hpp"
+#include "Actions.hpp"
 #include "Grammar.hpp"
 #include "GrammarBuilder.hpp"
+#include "Lex.hpp"
+#include "List.hpp"
+#include "Support.hpp"
 
 // Non-terminal
 struct Expr;
@@ -13,17 +15,31 @@ struct TermRest;
 struct Factor;
 
 // Terminal
-struct Num;
+// struct Num;
 struct Plus;
 struct Mul;
-struct LBr;
-struct RBr;
+struct LBrC;
+struct RBrC;
 
-DEF_TERM(Num);
-DEF_TERM(Mul);
-DEF_TERM(Plus);
-DEF_TERM(LBr);
-DEF_TERM(RBr);
+using NumRE  = decltype("0|(1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*"_tre);
+using Space  = decltype("  *"_tre);
+using PlusRE = decltype("+"_tre);
+using MulRE  = decltype("\\*"_tre);
+using LBrRE  = decltype("\\("_tre);
+using RBrRE  = decltype("\\)"_tre);
+
+using Lexer = CreateLexer<Seq<NumRE, NumAction>,
+                          Seq<Space>,
+                          Seq<PlusRE, MakeTokAction<Plus, NoValue>::Action>,
+                          Seq<MulRE, MakeTokAction<Mul, NoValue>::Action>,
+                          Seq<LBrRE, MakeTokAction<LBrC, NoValue>::Action>,
+                          Seq<RBrRE, MakeTokAction<RBrC, NoValue>::Action> >;
+
+using NumT = Terminalize<Num>;
+using MulT = Terminalize<Mul>;
+using PlusT = Terminalize<Plus>;
+using LBrT = Terminalize<LBrC>;
+using RBrT = Terminalize<RBrC>;
 
 template<typename Vals>
 struct PlusAction {
@@ -64,7 +80,7 @@ struct MulOne {
 };
 
 template<typename Vals>
-struct NumAction {
+struct NumActionC {
   using Val = Get<Vals, 0>;
   static constexpr auto Value = Val::Value;
 };
@@ -77,33 +93,26 @@ struct BracedAction {
 
 DEF_NTERM(Expr, Seq<CreateList<Term, ExprRest>, PlusAction>);
 DEF_NTERM(ExprRest, OneOf<CreateList<
-          Seq<CreateList<Plus, Term, ExprRest>, PlusRestAction>,
+          Seq<CreateList<PlusT, Term, ExprRest>, PlusRestAction>,
           Seq<Empty, PlusZero>>>);
 DEF_NTERM(Term, Seq<CreateList<Factor, TermRest>, MulAction>);
 DEF_NTERM(TermRest, OneOf<CreateList<
-          Seq<CreateList<Mul, Factor, TermRest>, MulRestAction>,
+          Seq<CreateList<MulT, Factor, TermRest>, MulRestAction>,
           Seq<Empty, MulOne>>>);
 DEF_NTERM(Factor, OneOf<CreateList<
-          Seq<CreateList<Num>, NumAction>,
-          Seq<CreateList<LBr, Expr, RBr>, BracedAction>>>);
+          Seq<CreateList<NumT>, NumActionC>,
+          Seq<CreateList<LBrT, Expr, RBrT>, BracedAction>>>);
 
-using S = Seq<CreateList<Expr>, NumAction>;
+using S = Seq<CreateList<Expr>, NumActionC>;
 
-CREATE_TOKEN(TokNum1, Num, 1);
-CREATE_TOKEN(TokNum3, Num, 3);
-CREATE_TOKEN(TokPlus, Plus, NoValue);
-CREATE_TOKEN(TokMul, Mul, NoValue);
-CREATE_TOKEN(TokLBr, LBr, NoValue);
-CREATE_TOKEN(TokRBr, RBr, NoValue);
-
-// (1 + 3) * 3 == 12
-using L = CreateList<TokLBr, TokNum1, TokPlus, TokNum3, TokRBr, TokMul, TokNum3>;
+using In = decltype("(((3381) + 231 * 232 + 1) + 28 * 23) + 3 * 2 * 2 + 123"_tstr);
+using L = typename Parse<Lexer, In>::Value::Value::Value;
 
 int main() {
   using Parsed = Parse<S, L>;
   constexpr bool State = std::is_same<True, typename Parsed::State>::value;
   constexpr int Value = Parsed::Value::Value;
   static_assert(State, "Match fail");
-  static_assert(Value != 12, "Answer");
+  using Ans = decltype(std::integral_constant<int, Value>())::Ans;
   return 0;
 }
