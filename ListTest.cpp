@@ -12,7 +12,7 @@ static_assert(State == true, "Fail!");
 
 using L5 = CreateList<int, bool>;
 using L6 = CreateList<double, bool>;
-using L7 = CreateList<L5, L6, L5>;
+using L7 = CreateList<CreateList<L5>, CreateList<CreateList<L6>, L5> >;
 using L8 = FlattenV<L7>;
 using L9 = CreateList<int, bool, double, bool, int, bool>;
 constexpr bool State2 = std::is_same<L8, L9>::value;

@@ -83,9 +83,12 @@ using AppendV = typename Append<T, U>::Value;
 
 template<typename L>
 struct Flatten {
-  using H = typename L::Head;
-  using T = typename L::Tail;
-  using Value = AppendV<H, typename Flatten<T>::Value>;
+  using Value = L;
+};
+
+template<typename H, typename T>
+struct Flatten<List<H, T> > {
+  using Value = AppendV<typename Flatten<H>::Value, typename Flatten<T>::Value>;
 };
 
 template<>
