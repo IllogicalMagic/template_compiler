@@ -74,4 +74,10 @@ struct Token {
   using Value = V;
 };
 
+template<typename T, auto V>
+struct TokenV {
+  using Type = T;
+  static constexpr auto Value = V;
+};
+
 #endif

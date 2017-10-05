@@ -28,6 +28,23 @@ struct ClExpr;
 struct ClExprRest;
 struct Primal;
 
+// Builded parser action {{
+template<typename X>
+struct GetVal {
+  using Value = typename X::Value;
+};
+
+template<typename T, typename V>
+struct GetVal<Token<T, V> > {
+  using Value = T;
+};
+
+template<typename Vals>
+struct CaptureSymbols {
+  using Value = Map<Vals, GetVal>;
+};
+// }}
+
 // Actions {{
 template<typename Vals>
 struct SymbolAct {
@@ -46,7 +63,7 @@ struct ClExprRestAct {
   template<typename T>
   struct This {
     using Type =
-      NonTerminal<ClExprRest, OneOf<CreateList<Seq<CreateList<T, This<T>>>,
+      NonTerminal<ClExprRest, OneOf<CreateList<Seq<CreateList<T, This<T>>, CaptureSymbols>,
                                                Seq<Empty>>>>;
   };
   template<typename T>
@@ -82,7 +99,7 @@ template<typename Vals>
 struct CExprAct {
   using Val = typename Get<Vals, 0>::Value;
   using Rest = typename Get<Vals, 1>::Value;
-  using Value = Seq<List<Val, Rest>>;
+  using Value = Seq<List<Val, Rest>, CaptureSymbols>;
 };
 
 template<typename Vals>

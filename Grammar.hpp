@@ -20,11 +20,13 @@ struct EmptyInt {
 using Empty = CreateList<EmptyInt>;
 
 template<typename>
-struct NoAct;
+struct NoAct {
+  using Value = Nil;
+};
 
 template<typename Vals>
 struct Extract {
-  using Value = typename Get<Vals, 0>::Value;
+  using Value = Get<Vals, 0>;
 };
 // }}
 
