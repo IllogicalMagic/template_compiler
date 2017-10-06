@@ -116,4 +116,18 @@ struct Filter<Nil, P> {
 template<typename L, template<typename> typename P>
 using FilterV = typename Filter<L, P>::Value;
 
+template<template<typename, typename> typename F, typename V, typename L>
+struct FoldL {
+  using NewV = typename F<V, typename L::Head>::Value;
+  using Value = typename FoldL<F, NewV, typename L::Tail>::Value;
+};
+
+template<template<typename, typename> typename F, typename V>
+struct FoldL<F, V, Nil> {
+  using Value = V;
+};
+
+template<template<typename, typename> typename F, typename V, typename L>
+using FoldLV = typename FoldL<F, V, L>::Value;
+
 #endif
