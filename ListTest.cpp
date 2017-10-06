@@ -30,3 +30,9 @@ constexpr bool State3 = std::is_same<L11, L12>::value;
 static_assert(State3 == false, "Success!");
 static_assert(State3 == true, "Fail!");
 
+using T1 = ToTupleV<L9>;
+using T2 = std::tuple<int, bool, double, bool, int, bool>;
+constexpr bool State4 = std::is_same<T1, T2>::value;
+static_assert(State4 == false, "Success!");
+static_assert(State4 == true, "Fail!");
+

@@ -4,6 +4,9 @@
 #include "Types.hpp"
 #include "Support.hpp"
 
+#include <tuple>
+#include <utility>
+
 // List structure
 template<typename H, typename T>
 struct List {
@@ -129,5 +132,22 @@ struct FoldL<F, V, Nil> {
 
 template<template<typename, typename> typename F, typename V, typename L>
 using FoldLV = typename FoldL<F, V, L>::Value;
+
+template<typename List>
+struct ToTuple {
+  template<typename...Args>
+  static auto IM(std::tuple<Args...>&&, Nil&&)
+    -> std::tuple<Args...>;
+
+  template<typename...Args, typename L>
+  static auto IM(std::tuple<Args...>&&, L&&)
+    -> decltype(IM(std::declval<std::tuple<Args..., typename L::Head> >(),
+                   std::declval<typename L::Tail>()));
+
+  using Value = decltype(IM(std::tuple<>(), std::declval<List>()));
+};
+
+template<typename L>
+using ToTupleV = typename ToTuple<L>::Value;
 
 #endif
