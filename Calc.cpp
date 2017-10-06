@@ -6,6 +6,8 @@
 #include "GrammarBuilder.hpp"
 #include "Lex.hpp"
 #include "List.hpp"
+#include "RegExp.hpp"
+#include "RegExpTemplates.hpp"
 #include "Support.hpp"
 
 // Non-terminal
@@ -24,7 +26,6 @@ struct Div;
 struct LBrC;
 struct RBrC;
 
-using NumRE   = decltype("0|(-|)(1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*"_tre);
 using Space   = decltype("  *"_tre);
 using PlusRE  = decltype("+"_tre);
 using MinusRE = decltype("-"_tre);
