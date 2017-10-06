@@ -103,6 +103,11 @@ struct CExprAct {
 };
 
 template<typename Vals>
+struct CExprEmptyAct {
+  using Value = Seq<Empty>;
+};
+
+template<typename Vals>
 struct UExprRestAct {
   using Val = typename Get<Vals, 1>::Value;
   using Rest = typename Get<Vals, 2>::Value;
@@ -136,7 +141,9 @@ DEF_NTERM(UExpr, Seq<CreateList<CExpr, UExprRest>, UExprAct>);
 DEF_NTERM(UExprRest, OneOf<CreateList<
           Seq<CreateList<Union, CExpr, UExprRest>, UExprRestAct>,
           Seq<Empty, UExprRestEmptyAct>>>);
-DEF_NTERM(CExpr, Seq<CreateList<ClExpr, CExprRest>, CExprAct>);
+DEF_NTERM(CExpr, OneOf<CreateList<
+          Seq<CreateList<ClExpr, CExprRest>, CExprAct>,
+          Seq<Empty, CExprEmptyAct>>>);
 DEF_NTERM(CExprRest, OneOf<CreateList<
           Seq<CreateList<ClExpr, CExprRest>, CExprRestAct>,
           Seq<Empty, CExprRestEmptyAct>>>);

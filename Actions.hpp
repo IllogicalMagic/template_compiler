@@ -22,8 +22,13 @@ struct MakeNum<Nil, N> {
 template<typename L>
 struct NumAction {
   using Tree = typename L::Head::Value;
-  using Nums = FlattenV<Tree>;
-  using Value = TokenV<Num, MakeNum<Nums, 0>::Value>;
+  using Syms = FlattenV<Tree>;
+  static constexpr auto Sign = Syms::Head::value;
+  using Nums = typename If<ToBool<Sign == '-'>,
+                           typename Syms::Tail,
+                           Syms>::Value;
+  static constexpr auto Val = MakeNum<Nums, 0>::Value;
+  using Value = TokenV<Num, Sign == '-' ? -Val : Val>;
 };
 
 template<typename T, typename V>
