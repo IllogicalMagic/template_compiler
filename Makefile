@@ -1,2 +1,2 @@
 clean:
-	rm -rf *~ *.o a.out
+	rm -rf *~ *.o *.s a.out
