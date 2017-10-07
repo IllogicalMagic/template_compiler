@@ -60,4 +60,15 @@ struct If<False, T, F> {
 template<typename C, typename T, typename F>
 using IfV = typename If<C, T, F>::Value;
 
+template<template<typename, typename> typename F>
+struct Flip {
+  template<typename T, typename U>
+  struct This {
+    using Value = typename F<U, T>::Value;
+  };
+
+  template<typename T, typename U>
+  using Value = This<T, U>;
+};
+
 #endif

@@ -14,6 +14,14 @@ struct List {
   typedef T Tail;
 };
 
+template<typename E, typename L>
+struct Cons {
+  using Value = List<E, L>;
+};
+
+template<typename E, typename L>
+using ConsV = typename Cons<E, L>::Value;
+
 // Helper template for list creation
 template<typename T, typename... Args>
 struct CreateListInt {
@@ -149,5 +157,13 @@ struct ToTuple {
 
 template<typename L>
 using ToTupleV = typename ToTuple<L>::Value;
+
+template<typename L>
+struct Reverse {
+  using Value = FoldLV<Flip<Cons>::Value, Nil, L>;
+};
+
+template<typename L>
+using ReverseV = typename Reverse<L>::Value;
 
 #endif
