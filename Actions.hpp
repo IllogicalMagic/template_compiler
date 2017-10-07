@@ -41,10 +41,13 @@ struct MakeTokAction {
 
 struct Identifier;
 
-template<typename L>
-struct MakeIdToken {
-  using Tree = typename L::Head::Value;
-  using Value = Token<Identifier, FlattenV<Tree> >;
+template<typename Type>
+struct MakeStrToken {
+  template<typename L>
+  struct Action {
+    using Tree = typename L::Head::Value;
+    using Value = Token<Type, FlattenV<Tree> >;
+  };
 };
 
 #endif
