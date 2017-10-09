@@ -255,8 +255,28 @@ struct PrintOp<NumRef<N> > {
 };
 
 template<auto N>
+struct PrintNumImpl {
+  using Value = List<Const<(char)('0' + N % 10)>, typename PrintNumImpl<N / 10>::Value>;
+};
+
+template<>
+struct PrintNumImpl<0> {
+  using Value = Nil;
+};
+
+template<auto N>
+struct PrintNum {
+  using Value = ReverseV<typename PrintNumImpl<N>::Value>;
+};
+
+template<>
+struct PrintNum<0> {
+  using Value = CreateList<Const<'0'> >;
+};
+
+template<auto N>
 struct PrintOp<TmpRef<N> > {
-  using Value = CreateList<Const<'%'>, Const<char('0' + N)> >;
+  using Value = List<Const<'%'>, typename PrintNum<N>::Value>;
 };
 
 template<typename N>
@@ -312,7 +332,7 @@ struct Printer {
 // }} Printer
 using S = Seq<CreateList<Insts>, Extract>;
 
-using In = decltype("a = 1 + (1 + 7) / 2 + 3;  b = a * (a + 3) + 2;"_tstr);
+using In = decltype("a = 2 + 1 * (1 * (2 + 3 * 7) + 7 * (2 + 8 * (3 + 0 * (2 + (1 * (1 + 3 * (0 + 1 * 2)))))));"_tstr);
 using L = typename Parse<Lexer, In>::Value::Value::Value;
 
 using Parsed = Parse<S, L>;
@@ -324,7 +344,9 @@ using AST = Parsed::Value::Value::Value;
 using Code = typename CodeGen<AST, TmpState<0> >::Insts;
 using Output = ToTupleV<typename Printer<Code>::Value>;
 
+const auto Result = TupleToString(Output());
+
 int main() {
-  printf("%s", TupleToString(Output()).data());
+  printf("%s", Result.data());
   return 0;
 }
