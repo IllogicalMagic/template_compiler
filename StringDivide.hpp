@@ -50,4 +50,8 @@ template<typename T, T... S>
 auto operator ""_tstr()
   -> typename TokenizeInImpl<CreateList<Const<S>...> >::Value;
 
+template<typename T, T... S>
+auto operator ""_str()
+  -> CreateList<Const<S>...>;
+
 #endif
