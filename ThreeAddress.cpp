@@ -12,6 +12,8 @@
 #include <cstdio>
 
 // Non-terminal
+struct Insts;
+struct InstsRest;
 struct Assignment;
 struct Expr;
 struct ExprRest;
@@ -27,6 +29,7 @@ struct Mul;
 struct Div;
 struct LBrC;
 struct RBrC;
+struct Endl;
 
 // Lex {{
 using Space    = decltype("  *"_tre);
@@ -37,6 +40,7 @@ using MulRE    = decltype("\\*"_tre);
 using DivRE    = decltype("/"_tre);
 using LBrRE    = decltype("\\("_tre);
 using RBrRE    = decltype("\\)"_tre);
+using EndlRE   = decltype(";"_tre);
 
 using Lexer = CreateLexer<Seq<NumRE, MakeStrToken<Num>::Action>,
                           Seq<Space>,
@@ -47,6 +51,7 @@ using Lexer = CreateLexer<Seq<NumRE, MakeStrToken<Num>::Action>,
                           Seq<DivRE, MakeTokAction<Div, NoValue>::Action>,
                           Seq<LBrRE, MakeTokAction<LBrC, NoValue>::Action>,
                           Seq<RBrRE, MakeTokAction<RBrC, NoValue>::Action>,
+                          Seq<EndlRE, MakeTokAction<Endl, NoValue>::Action>,
                           Seq<IdRE, MakeStrToken<Identifier>::Action> >;
 // }} Lex
 
@@ -59,6 +64,7 @@ using MinusT  = Terminalize<Minus>;
 using AssignT = Terminalize<Assign>;
 using LBrT    = Terminalize<LBrC>;
 using RBrT    = Terminalize<RBrC>;
+using EndlT   = Terminalize<Endl>;
 
 // AST node types {{
 struct Arith;
@@ -76,6 +82,12 @@ struct IdRef {
 // }} AST
 
 // Parser actions {{
+template<typename Vals>
+struct InstsAction {
+  using Lhs = typename Get<Vals, 0>::Value;
+  using Rhs = typename Get<Vals, 2>::Value;
+  using Value = List<Lhs, Rhs>;
+};
 template<typename Vals>
 struct AssignAction {
   using Lhs = TreeLeaf<IdRef<typename Get<Vals, 0>::Value> >;
@@ -118,6 +130,10 @@ struct BracedAction {
 // }} Parser actions
 
 // Grammar {{
+DEF_NTERM(Insts, Seq<CreateList<Assignment, EndlT, InstsRest>, InstsAction>);
+DEF_NTERM(InstsRest, OneOf<CreateList<
+          Seq<CreateList<Insts>, ExtractV>,
+          Seq<Empty>>>);
 DEF_NTERM(Assignment, Seq<CreateList<IdT, AssignT, Expr>, AssignAction>);
 DEF_NTERM(Expr, Seq<CreateList<Term, ExprRest>, ArithAction>);
 DEF_NTERM(ExprRest, OneOf<CreateList<
@@ -131,6 +147,7 @@ DEF_NTERM(TermRest, OneOf<CreateList<
           Seq<Empty>>>);
 DEF_NTERM(Factor, OneOf<CreateList<
           Seq<CreateList<NumT>, NumActionC>,
+          Seq<CreateList<IdT>, IdAction>,
           Seq<CreateList<LBrT, Expr, RBrT>, BracedAction>>>);
 // }} Grammar
 
@@ -154,6 +171,17 @@ struct TmpRef {
 template<typename, typename>
 struct CodeGen;
 
+template<typename I, typename Rest, typename S>
+struct CodeGen<List<I, Rest>, S> {
+  using Lhs = typename CodeGen<I, S>::Insts;
+  using Rhs = typename CodeGen<Rest, S>::Insts;
+  using Insts = AppendV<Lhs, Rhs>;
+};
+
+template<typename S>
+struct CodeGen<Nil, S> {
+  using Insts = Nil;
+};
 template<typename Vals, typename S>
 struct CodeGen<Tree<Assign, Vals>, S> {
   using State = S;
@@ -184,7 +212,7 @@ struct ArithHandler {
 
 template<typename Vals, typename S>
 struct CodeGen<Tree<Arith, Vals>, S> {
-  using Lhs = CodeGen<Get<Vals, 0>, TmpState<S::TmpNum + 1>>;
+  using Lhs = CodeGen<Get<Vals, 0>, TmpState<S::TmpNum>>;
   using NewS = IfV<EqualV<TmpRef<S::TmpNum + 1>, typename Lhs::Ref>,
                    TmpState<S::TmpNum + 1>,
                    S>;
@@ -282,9 +310,9 @@ struct Printer {
   using Value = FlattenV<Map<L, PrintInst> >;
 };
 // }} Printer
-using S = Seq<CreateList<Assignment>, Extract>;
+using S = Seq<CreateList<Insts>, Extract>;
 
-using In = decltype("a = 1 * 3 * (2 + 1) + 2 * (3 + 4 / 2) * 5 + 7"_tstr);
+using In = decltype("a = 1 + (1 + 7) / 2 + 3;  b = a * (a + 3) + 2;"_tstr);
 using L = typename Parse<Lexer, In>::Value::Value::Value;
 
 using Parsed = Parse<S, L>;

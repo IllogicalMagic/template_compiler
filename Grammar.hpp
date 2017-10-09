@@ -28,6 +28,11 @@ template<typename Vals>
 struct Extract {
   using Value = Get<Vals, 0>;
 };
+
+template<typename Vals>
+struct ExtractV {
+  using Value = typename Get<Vals, 0>::Value;
+};
 // }}
 
 // Match sequence of tokens {{
