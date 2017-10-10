@@ -38,7 +38,6 @@ static_assert(State4 == true, "Fail!");
 
 using L13 = ReverseV<L9>;
 using L14 = CreateList<bool, int, bool, double, bool, int>;
-using X = L13::X;
 constexpr bool State5 = std::is_same<L13, L14>::value;
 static_assert(State5 == false, "Success!");
 static_assert(State5 == true, "Fail!");
