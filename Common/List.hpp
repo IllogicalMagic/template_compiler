@@ -46,6 +46,9 @@ struct ConsIfNotNil<Nil, L> {
   typedef L Value;
 };
 
+template<typename T, typename L>
+using ConsIfNotNilV = typename ConsIfNotNil<T, L>::Value;
+
 template<typename L, int N>
 struct GetImpl {
   using Value = typename GetImpl<typename L::Tail, N - 1>::Value;

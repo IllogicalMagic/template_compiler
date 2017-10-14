@@ -21,69 +21,134 @@ struct IfRest;
 struct Assignment;
 struct Expr;
 struct ExprRest;
+struct LAndExpr;
+struct LAndExprRest;
+struct Cmp;
+struct CmpRest;
+struct ArExpr;
+struct ArExprRest;
 struct Term;
 struct TermRest;
 struct Factor;
 
 // Terminal
 struct Assign;
+
+struct LOr;
+struct LAnd;
+
+struct Eq;
+struct Ne;
+struct Le;
+struct Ge;
+struct Ls;
+struct Gr;
+
 struct Plus;
 struct Minus;
 struct Mul;
 struct Div;
+
 struct LPar;
 struct RPar;
 struct LBrC;
 struct RBrC;
+
 struct IfKW;
 struct ElseKW;
+
 struct Endl;
 
 // Lex {{
 using Space    = decltype("  *"_tre);
 using AssignRE = decltype("="_tre);
+
+using LOrRE    = decltype("or"_tre);
+using LAndRE   = decltype("and"_tre);
+
+using EqRE     = decltype("=="_tre);
+using NeRE     = decltype("!="_tre);
+using LsRE     = decltype("<"_tre);
+using GrRE     = decltype(">"_tre);
+using LeRE     = decltype("<="_tre);
+using GeRE     = decltype(">="_tre);
+
 using PlusRE   = decltype("+"_tre);
 using MinusRE  = decltype("-"_tre);
 using MulRE    = decltype("\\*"_tre);
 using DivRE    = decltype("/"_tre);
+
 using LParRE   = decltype("\\("_tre);
 using RParRE   = decltype("\\)"_tre);
 using LBrRE    = decltype("{"_tre);
 using RBrRE    = decltype("}"_tre);
+
 using EndlRE   = decltype(";"_tre);
+
 using IfRE     = decltype("if"_tre);
 using ElseRE   = decltype("else"_tre);
 
 using Lexer = CreateLexer<Seq<NumRE, MakeStrToken<Num>::Action>,
+
                           Seq<Space>,
+
+                          Seq<LOrRE, MakeTokAction<LOr, NoValue>::Action>,
+                          Seq<LAndRE, MakeTokAction<LAnd, NoValue>::Action>,
+
+                          Seq<EqRE, MakeTokAction<Eq, NoValue>::Action>,
+                          Seq<NeRE, MakeTokAction<Ne, NoValue>::Action>,
+                          Seq<LeRE, MakeTokAction<Le, NoValue>::Action>,
+                          Seq<GeRE, MakeTokAction<Ge, NoValue>::Action>,
+                          Seq<LsRE, MakeTokAction<Ls, NoValue>::Action>,
+                          Seq<GrRE, MakeTokAction<Gr, NoValue>::Action>,
+
                           Seq<AssignRE, MakeTokAction<Assign, NoValue>::Action>,
+
                           Seq<PlusRE, MakeTokAction<Plus, NoValue>::Action>,
                           Seq<MinusRE, MakeTokAction<Minus, NoValue>::Action>,
                           Seq<MulRE, MakeTokAction<Mul, NoValue>::Action>,
                           Seq<DivRE, MakeTokAction<Div, NoValue>::Action>,
+
                           Seq<LParRE, MakeTokAction<LPar, NoValue>::Action>,
                           Seq<RParRE, MakeTokAction<RPar, NoValue>::Action>,
                           Seq<LBrRE, MakeTokAction<LBrC, NoValue>::Action>,
                           Seq<RBrRE, MakeTokAction<RBrC, NoValue>::Action>,
+
                           Seq<EndlRE, MakeTokAction<Endl, NoValue>::Action>,
                           Seq<IfRE, MakeTokAction<IfKW, NoValue>::Action>,
                           Seq<ElseRE, MakeTokAction<ElseKW, NoValue>::Action>,
+
                           Seq<IdRE, MakeStrToken<Identifier>::Action> >;
 // }} Lex
 
 using NumT    = Terminalize<Num>;
 using IdT     = Terminalize<Identifier>;
+
 using MulT    = Terminalize<Mul>;
 using DivT    = Terminalize<Div>;
 using PlusT   = Terminalize<Plus>;
 using MinusT  = Terminalize<Minus>;
+
+using EqT  = Terminalize<Eq>;
+using NeT  = Terminalize<Ne>;
+using LeT  = Terminalize<Le>;
+using GeT  = Terminalize<Ge>;
+using LsT  = Terminalize<Ls>;
+using GrT  = Terminalize<Gr>;
+
+using LAndT  = Terminalize<LAnd>;
+using LOrT  = Terminalize<LOr>;
+
 using AssignT = Terminalize<Assign>;
+
 using LParT   = Terminalize<LPar>;
 using RParT   = Terminalize<RPar>;
 using LBrT    = Terminalize<LBrC>;
 using RBrT    = Terminalize<RBrC>;
+
 using IfT     = Terminalize<IfKW>;
 using ElseT   = Terminalize<ElseKW>;
+
 using EndlT   = Terminalize<Endl>;
 
 // AST node types {{
@@ -181,12 +246,36 @@ DEF_NTERM(InstN, OneOf<CreateList<
 DEF_NTERM(IfRest, OneOf<CreateList<
           Seq<CreateList<ElseT, InstN>, ElseAction>,
           Seq<Empty>>>);
+
 DEF_NTERM(Assignment, Seq<CreateList<IdT, AssignT, Expr>, AssignAction>);
-DEF_NTERM(Expr, Seq<CreateList<Term, ExprRest>, ArithAction>);
+
+DEF_NTERM(Expr, Seq<CreateList<LAndExpr, ExprRest>, ArithAction>);
 DEF_NTERM(ExprRest, OneOf<CreateList<
-          Seq<CreateList<PlusT, Term, ExprRest>, ArithRestAction<Plus>::Action>,
-          Seq<CreateList<MinusT, Term, ExprRest>, ArithRestAction<Minus>::Action>,
+          Seq<CreateList<LOrT, LAndExpr, ExprRest>, ArithRestAction<LOr>::Action>,
           Seq<Empty>>>);
+
+DEF_NTERM(LAndExpr, Seq<CreateList<Cmp, LAndExprRest>, ArithAction>);
+DEF_NTERM(LAndExprRest, OneOf<CreateList<
+          Seq<CreateList<LAndT, Cmp, LAndExprRest>, ArithRestAction<LAnd>::Action>,
+          Seq<Empty>>>);
+
+DEF_NTERM(Cmp, Seq<CreateList<ArExpr, CmpRest>, ArithAction>);
+DEF_NTERM(CmpRest, OneOf<CreateList<
+          Seq<CreateList<EqT, ArExpr, CmpRest>, ArithRestAction<Eq>::Action>,
+          Seq<CreateList<NeT, ArExpr, CmpRest>, ArithRestAction<Ne>::Action>,
+          Seq<CreateList<LeT, ArExpr, CmpRest>, ArithRestAction<Le>::Action>,
+          Seq<CreateList<GeT, ArExpr, CmpRest>, ArithRestAction<Ge>::Action>,
+          Seq<CreateList<LsT, ArExpr, CmpRest>, ArithRestAction<Ls>::Action>,
+          Seq<CreateList<GrT, ArExpr, CmpRest>, ArithRestAction<Gr>::Action>,
+          Seq<Empty>>>);
+
+
+DEF_NTERM(ArExpr, Seq<CreateList<Term, ArExprRest>, ArithAction>);
+DEF_NTERM(ArExprRest, OneOf<CreateList<
+          Seq<CreateList<PlusT, Term, ArExprRest>, ArithRestAction<Plus>::Action>,
+          Seq<CreateList<MinusT, Term, ArExprRest>, ArithRestAction<Minus>::Action>,
+          Seq<Empty>>>);
+
 DEF_NTERM(Term, Seq<CreateList<Factor, TermRest>, ArithAction>);
 DEF_NTERM(TermRest, OneOf<CreateList<
           Seq<CreateList<MulT, Factor, TermRest>, ArithRestAction<Mul>::Action>,
@@ -211,7 +300,8 @@ struct Inst {
   using Vals = ValsT;
 };
 
-struct GoToCond;
+struct GoToFalse;
+struct GoToTrue;
 struct GoTo;
 
 template<auto N>
@@ -229,15 +319,16 @@ struct CodeGen;
 
 template<typename C, typename T, typename F, typename S>
 struct CodeGen<Tree<IfN, List<C, List<T, List<F, Nil > >> >, S> {
-  using State = CodeGenState<S::TmpNum, S::LabelNum + 2>;
-  using Cond = CodeGen<C, S>;
+  using Cond = CodeGen<C, CodeGenState<S::TmpNum, S::LabelNum> >;
+  static constexpr auto CurLabel = Cond::State::LabelNum;
+  using State = CodeGenState<S::TmpNum, CurLabel + 2>;
   using IfBlock = CodeGen<T, S>;
   using ElseBlock = CodeGen<F, State>;
-  using ElseLabel = Label<S::LabelNum>;
-  using EndLabel = Label<S::LabelNum + 1>;
+  using ElseLabel = Label<CurLabel + 1>;
+  using EndLabel = Label<CurLabel + 2>;
   using Insts = FlattenV<CreateList<
-                           typename Cond::Insts,
-                           CreateList<Inst<GoToCond, CreateList<typename Cond::Ref, ElseLabel> > >,
+                           ReverseV<typename Cond::Insts>,
+                           CreateList<Inst<GoToFalse, CreateList<typename Cond::Ref, ElseLabel> > >,
                            typename IfBlock::Insts, 
                            CreateList<Inst<GoTo, CreateList<EndLabel> > >,
                            CreateList<ElseLabel>,
@@ -275,37 +366,94 @@ struct CodeGen<Tree<Assign, Vals>, S> {
   using Insts = ReverseV<List<AssignInst, typename Rhs::Insts> >;
 };
 
-template<typename S, typename I, typename LR>
+template<typename OpT, auto Label, typename Ref>
+struct LazyGoto {
+  using Value = Nil;
+};
+
+template<auto LNum, typename Ref>
+struct LazyGoto<LOr, LNum, Ref> {
+  using Value = Inst<GoToTrue, CreateList<Ref, Label<LNum> > >;
+};
+
+template<auto LNum, typename Ref>
+struct LazyGoto<LAnd, LNum, Ref> {
+  using Value = Inst<GoToFalse, CreateList<Ref, Label<LNum> > >;
+};
+
+template<typename OpT, auto LNum>
+struct LazyLabelImpl {
+  using Value = Nil;
+};
+
+template<auto LNum>
+struct LazyLabelImpl<LOr, LNum> {
+  using Value = Label<LNum>;
+};
+
+template<auto LNum>
+struct LazyLabelImpl<LAnd, LNum> {
+  using Value = Label<LNum>;
+};
+
+
+template<typename L, auto LNum>
+struct LazyLabel {
+  using Value = typename LazyLabelImpl<typename Get<L, 1>::First, LNum>::Value;
+};
+
+template<auto LNum>
+struct LazyLabel<Nil, LNum> {
+  using Value = Nil;
+};
+
+template<typename S, typename I, typename LR, auto EL>
 struct Accumulate {
   using State = S;
   using Insts = I;
   using LastRef = LR;
+  static constexpr auto EndLabel = EL;
 };
 
 template<typename Acc, typename OpT>
 struct ArithHandler {
-  static constexpr auto TNum = Acc::State::TmpNum;
-  using Rhs = CodeGen<typename OpT::Second, CodeGenState<TNum + 1, Acc::State::LabelNum> >;
+  using State = typename Acc::State;
+  static constexpr auto TNum = State::TmpNum;
+  using Rhs = CodeGen<typename OpT::Second, CodeGenState<TNum + 1, State::LabelNum + 1> >;
   using Lhs = typename Acc::LastRef;
   using NewI = Inst<typename OpT::First, CreateList<TmpRef<TNum>, Lhs, typename Rhs::Ref> >;
-  using AllInsts = AppendV<typename Rhs::Insts, typename Acc::Insts>;
-  using NewAcc = Accumulate<typename Acc::State,
-                            List<NewI, AllInsts>, TmpRef<TNum> >;
+  // Goto for lazy operators
+  using Lazy = typename LazyGoto<typename OpT::First, Acc::EndLabel, Lhs>::Value;
+
+  using AllInsts = AppendV<typename Rhs::Insts, ConsIfNotNilV<Lazy, typename Acc::Insts> >;
+  using NewInsts = List<NewI, AllInsts>;
+  using NewS = typename Rhs::State;
+  using NewAcc = Accumulate<NewS, NewInsts, TmpRef<TNum>, Acc::EndLabel>;
   using Value = NewAcc;
 };
 
 template<typename Vals, typename S>
 struct CodeGen<Tree<Arith, Vals>, S> {
-  using Lhs = CodeGen<Get<Vals, 0>, CodeGenState<S::TmpNum, S::LabelNum>>;
-  using NewS = IfV<EqualV<TmpRef<S::TmpNum + 1>, typename Lhs::Ref>,
-                   CodeGenState<S::TmpNum + 1, S::LabelNum>,
-                   S>;
+  // Lhs {{
+  using ReduceState = CodeGenState<S::TmpNum, S::LabelNum + 1>;
+  using Lhs = CodeGen<Get<Vals, 0>, ReduceState >;
+  using LhsI = IfV<EqualV<TmpRef<S::TmpNum>, typename Lhs::Ref>,
+                   Nil,
+                   Inst<Assign, CreateList<TmpRef<S::TmpNum>, typename Lhs::Ref> > >;
+  using LhsInsts = ConsIfNotNilV<LhsI, typename Lhs::Insts>;
+  // }} Lhs
+  // Rest {{
+  static constexpr auto RhsLabel = Lhs::State::LabelNum;
   using Ref = TmpRef<S::TmpNum>;
+  // For lazy operators like 'or' and 'and'
+  using EndLabel = typename LazyLabel<Vals, S::LabelNum>::Value;
   using IM =
     typename FoldL<ArithHandler,
-                   Accumulate<NewS, typename Lhs::Insts, typename Lhs::Ref>,
+                   Accumulate<CodeGenState<S::TmpNum, RhsLabel>, LhsInsts, Ref, S::LabelNum>,
                    typename Vals::Tail>::Value;
-  using Insts = typename IM::Insts;
+  // }}
+  using Insts = ConsIfNotNilV<EndLabel, typename IM::Insts>;
+  using State = CodeGenState<S::TmpNum, IM::State::LabelNum>;
 };
 
 template<typename N, typename S>
@@ -333,6 +481,7 @@ using Asn = decltype("="_str);
 using CommaP = decltype(","_str);
 using ColonP = decltype(":"_str);
 using GoToFalseP = decltype("goto_false"_str);
+using GoToTrueP = decltype("goto_true"_str);
 using GoToP = decltype("goto"_str);
 
 template<typename Op>
@@ -382,6 +531,46 @@ template<typename T>
 struct PrintOpType;
 
 template<>
+struct PrintOpType<LOr> {
+  using Value = decltype("or"_str);
+};
+
+template<>
+struct PrintOpType<LAnd> {
+  using Value = decltype("and"_str);
+};
+
+template<>
+struct PrintOpType<Eq> {
+  using Value = decltype("=="_str);
+};
+
+template<>
+struct PrintOpType<Ne> {
+  using Value = decltype("!="_str);
+};
+
+template<>
+struct PrintOpType<Le> {
+  using Value = decltype("<="_str);
+};
+
+template<>
+struct PrintOpType<Ge> {
+  using Value = decltype(">="_str);
+};
+
+template<>
+struct PrintOpType<Ls> {
+  using Value = decltype("<"_str);
+};
+
+template<>
+struct PrintOpType<Gr> {
+  using Value = decltype(">"_str);
+};
+
+template<>
 struct PrintOpType<Plus> {
   using Value = CreateList<Const<'+'> >;
 };
@@ -419,10 +608,17 @@ struct PrintInstImpl<Inst<Assign, Ops> > {
 };
 
 template<typename Ops>
-struct PrintInstImpl<Inst<GoToCond, Ops> > {
+struct PrintInstImpl<Inst<GoToFalse, Ops> > {
   using C = typename PrintOp<Get<Ops, 0> >::Value;
   using L = typename PrintOp<Get<Ops, 1> >::Value;
   using Value = FlattenV<CreateList<GoToFalseP, WS, C, CommaP, WS, L, EndL> >;
+};
+
+template<typename Ops>
+struct PrintInstImpl<Inst<GoToTrue, Ops> > {
+  using C = typename PrintOp<Get<Ops, 0> >::Value;
+  using L = typename PrintOp<Get<Ops, 1> >::Value;
+  using Value = FlattenV<CreateList<GoToTrueP, WS, C, CommaP, WS, L, EndL> >;
 };
 
 template<typename Ops>
@@ -453,17 +649,11 @@ struct Printer {
 using S = Seq<CreateList<Insts>, Extract>;
 
 using In = decltype("{"
-                    "  a = 150 * 2;"
-                    "  if (a)"
-                    "    a = a + 2;"
-                    "  else {"
-                    "    a = a * 2;"
-                    "    if (a - 150) {"
-                    "      a = a - 2;"
-                    "    }"
-                    "    b = 7;"
+                    "  if (1 and 2 or 3 and 4 or 5 and 6) {"
+                    "    a = 2;"
+                    "  } else {"
+                    "    a = 3;"
                     "  }"
-                    "  b = a * a;"
                     "}"
                     ""_tstr);
 using L = typename Parse<Lexer, In>::Value::Value::Value;
