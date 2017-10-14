@@ -1,13 +1,13 @@
-#include "Actions.hpp"
-#include "Grammar.hpp"
-#include "GrammarBuilder.hpp"
-#include "Lex.hpp"
-#include "List.hpp"
-#include "RegExp.hpp"
-#include "RegExpTemplates.hpp"
-#include "Support.hpp"
-#include "Tree.hpp"
-#include "TupleFunc.hpp"
+#include "Common/List.hpp"
+#include "Common/Support.hpp"
+#include "Common/Tree.hpp"
+#include "Common/TupleFunc.hpp"
+#include "Grammar/Grammar.hpp"
+#include "Grammar/GrammarBuilder.hpp"
+#include "Lex/Actions.hpp"
+#include "Lex/Lex.hpp"
+#include "RegExp/RegExp.hpp"
+#include "RegExp/RegExpTemplates.hpp"
 
 #include <cstdio>
 

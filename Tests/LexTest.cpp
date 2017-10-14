@@ -1,12 +1,12 @@
-#include "Actions.hpp"
-#include "Lex.hpp"
-#include "List.hpp"
-#include "Grammar.hpp"
-#include "GrammarBuilder.hpp"
-#include "RegExp.hpp"
-#include "StringDivide.hpp"
-#include "Support.hpp"
-#include "Types.hpp"
+#include "Common/List.hpp"
+#include "Common/StringDivide.hpp"
+#include "Common/Support.hpp"
+#include "Common/Types.hpp"
+#include "Grammar/Grammar.hpp"
+#include "Grammar/GrammarBuilder.hpp"
+#include "Lex/Actions.hpp"
+#include "Lex/Lex.hpp"
+#include "RegExp/RegExp.hpp"
 
 using NumRE = decltype("0|(-|)(1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*"_tre);
 using Space = decltype("  *"_tre);

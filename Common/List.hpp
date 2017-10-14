@@ -1,8 +1,8 @@
 #ifndef TEMPLATE_TOOLS_LIST_HPP_INCLUDED
 #define TEMPLATE_TOOLS_LIST_HPP_INCLUDED
 
-#include "Types.hpp"
-#include "Support.hpp"
+#include "Common/Types.hpp"
+#include "Common/Support.hpp"
 
 #include <tuple>
 #include <utility>

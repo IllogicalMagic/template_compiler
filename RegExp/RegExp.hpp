@@ -1,10 +1,10 @@
 #ifndef TEMPLATE_REGEXP_HPP_INCLUDED
 #define TEMPLATE_REGEXP_HPP_INCLUDED
 
-#include "Grammar.hpp"
-#include "GrammarBuilder.hpp"
-#include "StringDivide.hpp"
-#include "Support.hpp"
+#include "Grammar/Grammar.hpp"
+#include "Grammar/GrammarBuilder.hpp"
+#include "Common/StringDivide.hpp"
+#include "Common/Support.hpp"
 
 // RegExp grammar builder {{
 

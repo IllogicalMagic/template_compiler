@@ -1,7 +1,7 @@
 #ifndef TEMPLATE_TREE_INCLUDED_HPP
 #define TEMPLATE_TREE_INCLUDED_HPP
 
-#include "List.hpp"
+#include "Common/List.hpp"
 
 template<typename V, typename C>
 struct Tree {

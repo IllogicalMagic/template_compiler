@@ -1,7 +1,7 @@
 #ifndef GRAMMAR_BUILDER_HPP_INCLUDED_
 #define GRAMMAR_BUILDER_HPP_INCLUDED_
 
-#include "Grammar.hpp"
+#include "Grammar/Grammar.hpp"
 
 // Define terminal with name XT
 #define DEF_TERM(XT)                            \

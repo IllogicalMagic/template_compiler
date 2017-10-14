@@ -1,8 +1,8 @@
 #ifndef TEMPLATE_ACTIONS_HPP_INCLUDED
 #define TEMPLATE_ACTIONS_HPP_INCLUDED
 
-#include "GrammarBuilder.hpp"
-#include "List.hpp"
+#include "Grammar/GrammarBuilder.hpp"
+#include "Common/List.hpp"
 
 #include <utility>
 

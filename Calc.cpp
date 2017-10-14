@@ -1,14 +1,14 @@
-#include <type_traits>
-#include <functional>
+#include "Common/List.hpp"
+#include "Common/Support.hpp"
+#include "Grammar/Grammar.hpp"
+#include "Grammar/GrammarBuilder.hpp"
+#include "Lex/Actions.hpp"
+#include "Lex/Lex.hpp"
+#include "RegExp/RegExp.hpp"
+#include "RegExp/RegExpTemplates.hpp"
 
-#include "Actions.hpp"
-#include "Grammar.hpp"
-#include "GrammarBuilder.hpp"
-#include "Lex.hpp"
-#include "List.hpp"
-#include "RegExp.hpp"
-#include "RegExpTemplates.hpp"
-#include "Support.hpp"
+#include <functional>
+#include <type_traits>
 
 // Non-terminal
 struct Expr;

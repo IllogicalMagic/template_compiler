@@ -1,9 +1,9 @@
 #ifndef STRING_DIVIDE_HPP_INCLUDED
 #define STRING_DIVIDE_HPP_INCLUDED
 
-#include "List.hpp"
-#include "Types.hpp"
-#include "GrammarBuilder.hpp"
+#include "Common/List.hpp"
+#include "Common/Types.hpp"
+#include "Grammar/GrammarBuilder.hpp"
 
 #include <type_traits>
 #include <utility>

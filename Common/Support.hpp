@@ -1,7 +1,7 @@
 #ifndef GRAMMAR_SUPPORT_HPP_INCLUDED
 #define GRAMMAR_SUPPORT_HPP_INCLUDED
 
-#include "Types.hpp"
+#include "Common/Types.hpp"
 
 template<bool>
 struct ToBoolImpl {

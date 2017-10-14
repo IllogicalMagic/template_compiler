@@ -1,9 +1,9 @@
 #ifndef TEMPLATE_LEXER_HPP_INCLUDED
 #define TEMPLATE_LEXER_HPP_INCLUDED
 
-#include "Grammar.hpp"
-#include "GrammarBuilder.hpp"
-#include "RegExp.hpp"
+#include "Grammar/Grammar.hpp"
+#include "Grammar/GrammarBuilder.hpp"
+#include "RegExp/RegExp.hpp"
 
 template<typename Vals>
 struct ExtractToks {
