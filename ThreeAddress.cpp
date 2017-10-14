@@ -427,7 +427,7 @@ struct ArithHandler {
 
   using AllInsts = AppendV<typename Rhs::Insts, ConsIfNotNilV<Lazy, typename Acc::Insts> >;
   using NewInsts = List<NewI, AllInsts>;
-  using NewS = typename Rhs::State;
+  using NewS = CodeGenState<TNum, Rhs::State::LabelNum>;
   using NewAcc = Accumulate<NewS, NewInsts, TmpRef<TNum>, Acc::EndLabel>;
   using Value = NewAcc;
 };
