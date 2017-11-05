@@ -318,14 +318,18 @@ template<typename, typename>
 struct CodeGen;
 
 template<typename C, typename T, typename F, typename S>
-struct CodeGen<Tree<IfN, List<C, List<T, List<F, Nil > >> >, S> {
-  using Cond = CodeGen<C, CodeGenState<S::TmpNum, S::LabelNum> >;
-  static constexpr auto CurLabel = Cond::State::LabelNum;
-  using State = CodeGenState<S::TmpNum, CurLabel + 2>;
-  using IfBlock = CodeGen<T, S>;
-  using ElseBlock = CodeGen<F, State>;
-  using ElseLabel = Label<CurLabel + 1>;
-  using EndLabel = Label<CurLabel + 2>;
+struct CodeGen<Tree<IfN, List<C, List<T, List<F, Nil > > > >, S> {
+  using Cond = CodeGen<C, S>;
+  using CondState = typename Cond::State;
+
+  using IfBlock = CodeGen<T, CondState>;
+  using IfState = typename IfBlock::State;
+
+  using ElseBlock = CodeGen<F, IfState>;
+  using ElseState = typename ElseBlock::State;
+
+  using ElseLabel = Label<ElseState::LabelNum + 1>;
+  using EndLabel = Label<ElseState::LabelNum + 2>;
   using Insts = FlattenV<CreateList<
                            ReverseV<typename Cond::Insts>,
                            CreateList<Inst<GoToFalse, CreateList<typename Cond::Ref, ElseLabel> > >,
@@ -334,7 +338,7 @@ struct CodeGen<Tree<IfN, List<C, List<T, List<F, Nil > >> >, S> {
                            CreateList<ElseLabel>,
                            typename ElseBlock::Insts,
                            CreateList<EndLabel> > >;
-
+  using State = CodeGenState<ElseState::TmpNum, ElseState::LabelNum + 2>;
 };
 
 template<typename I, typename S>
@@ -419,7 +423,7 @@ template<typename Acc, typename OpT>
 struct ArithHandler {
   using State = typename Acc::State;
   static constexpr auto TNum = State::TmpNum;
-  using Rhs = CodeGen<typename OpT::Second, CodeGenState<TNum + 1, State::LabelNum + 1> >;
+  using Rhs = CodeGen<typename OpT::Second, CodeGenState<TNum + 1, State::LabelNum> >;
   using Lhs = typename Acc::LastRef;
   using NewI = Inst<typename OpT::First, CreateList<TmpRef<TNum>, Lhs, typename Rhs::Ref> >;
   // Goto for lazy operators
@@ -453,7 +457,7 @@ struct CodeGen<Tree<Arith, Vals>, S> {
                    typename Vals::Tail>::Value;
   // }}
   using Insts = ConsIfNotNilV<EndLabel, typename IM::Insts>;
-  using State = CodeGenState<S::TmpNum, IM::State::LabelNum>;
+  using State = typename IM::State;
 };
 
 template<typename N, typename S>
@@ -652,7 +656,7 @@ using In = decltype("{"
                     "  if (1 and 2 or 3 and 4 or 5 and 6) {"
                     "    a = 2;"
                     "  } else {"
-                    "    a = 3;"
+                    "    a = 3 and 3;"
                     "  }"
                     "}"
                     ""_tstr);
