@@ -4,7 +4,7 @@
 #include "Common/Types.hpp"
 #include "Grammar/Grammar.hpp"
 #include "Grammar/GrammarBuilder.hpp"
-#include "RegExp/RegExp.hpp"
+#include "RegExp/PERegExp.hpp"
 
 using RE = decltype("a\\|b"_tre);
 

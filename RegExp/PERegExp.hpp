@@ -1,3 +1,12 @@
+// Simple regular expression parser built using
+// parsing expression grammar.
+// Algorithm is:
+// 1) Build syntax tree for regular expression (using PEG);
+// 2) Process the tree to produce new PEG parser.
+// This approach fails in some cases (actually, in quite a number of cases).
+// For example, "a*aa" won't match "aa".
+// But is still can be used for simple regular expressions.
+
 #ifndef TEMPLATE_REGEXP_HPP_INCLUDED
 #define TEMPLATE_REGEXP_HPP_INCLUDED
 

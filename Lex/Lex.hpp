@@ -3,7 +3,7 @@
 
 #include "Grammar/Grammar.hpp"
 #include "Grammar/GrammarBuilder.hpp"
-#include "RegExp/RegExp.hpp"
+#include "RegExp/PERegExp.hpp"
 
 template<typename Vals>
 struct ExtractToks {

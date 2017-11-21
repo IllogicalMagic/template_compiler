@@ -6,7 +6,7 @@
 #include "Grammar/GrammarBuilder.hpp"
 #include "Lex/Actions.hpp"
 #include "Lex/Lex.hpp"
-#include "RegExp/RegExp.hpp"
+#include "RegExp/PERegExp.hpp"
 #include "RegExp/RegExpTemplates.hpp"
 
 #include <cstdio>

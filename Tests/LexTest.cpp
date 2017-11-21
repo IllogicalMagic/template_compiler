@@ -6,7 +6,7 @@
 #include "Grammar/GrammarBuilder.hpp"
 #include "Lex/Actions.hpp"
 #include "Lex/Lex.hpp"
-#include "RegExp/RegExp.hpp"
+#include "RegExp/PERegExp.hpp"
 
 using NumRE = decltype("0|(-|)(1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*"_tre);
 using Space = decltype("  *"_tre);
