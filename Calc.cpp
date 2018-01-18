@@ -60,8 +60,8 @@ struct ArithStep {
 
 template<typename Vals>
 struct ArithAction {
-  using Lhs = Get<Vals, 0>;
-  using Rhs = Get<Vals, 1>;
+  using Lhs = GetV<Vals, 0>;
+  using Rhs = GetV<Vals, 1>;
   static constexpr auto Value =
     FoldL<ArithStep, Const<Lhs::Value>, typename Rhs::Value>::Value::value;
 };
@@ -70,22 +70,22 @@ template<typename Op>
 struct ArithRestAction {
   template<typename Vals>
   struct Action {
-    using Lhs = Get<Vals, 1>;
+    using Lhs = GetV<Vals, 1>;
     using V = std::pair<Op, Lhs>;
-    using Rhs = typename Get<Vals, 2>::Value;
+    using Rhs = typename GetV<Vals, 2>::Value;
     using Value = List<V, Rhs>;
   };
 };
 
 template<typename Vals>
 struct NumActionC {
-  using Val = Get<Vals, 0>;
+  using Val = GetV<Vals, 0>;
   static constexpr auto Value = Val::Value;
 };
 
 template<typename Vals>
 struct BracedAction {
-  using Val = Get<Vals, 1>;
+  using Val = GetV<Vals, 1>;
   static constexpr auto Value = Val::Value;
 };
 

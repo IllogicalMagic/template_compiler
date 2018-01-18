@@ -7,8 +7,8 @@
 
 template<typename Vals>
 struct ExtractToks {
-  using All = typename Get<Vals, 0>::Value;
-  using Rest = typename Get<Vals, 1>::Value;
+  using All = typename GetV<Vals, 0>::Value;
+  using Rest = typename GetV<Vals, 1>::Value;
   using Value = typename If<typename Equal<All, Nil>::Value,
                             Rest,
                             List<All, Rest>>::Value;

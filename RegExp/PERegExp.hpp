@@ -36,13 +36,13 @@ struct CaptureSymbols {
 // Actions {{
 template<typename Vals>
 struct SymbolAct {
-  using Val = Get<Vals, 0>;
+  using Val = GetV<Vals, 0>;
   using Value = Terminalize<typename Val::Value>;
 };
 
 template<typename Vals>
 struct BracketAct {
-  using Val = Get<Vals, 1>;
+  using Val = GetV<Vals, 1>;
   using Value = typename Val::Value;
 };
 
@@ -66,15 +66,15 @@ struct ClExprRestPassAct {
 
 template<typename Vals>
 struct ClExprAct {
-  using Val = Get<Vals, 0>;
-  using Closure = Get<Vals, 1>;
+  using Val = GetV<Vals, 0>;
+  using Closure = GetV<Vals, 1>;
   using Value = typename Closure::template Value<typename Val::Value>;
 };
 
 template<typename Vals>
 struct CExprRestAct {
-  using Val = typename Get<Vals, 0>::Value;
-  using Rest = typename Get<Vals, 1>::Value;
+  using Val = typename GetV<Vals, 0>::Value;
+  using Rest = typename GetV<Vals, 1>::Value;
   using Value = List<Val, Rest>;
 };
 
@@ -85,8 +85,8 @@ struct CExprRestEmptyAct {
 
 template<typename Vals>
 struct CExprAct {
-  using Val = typename Get<Vals, 0>::Value;
-  using Rest = typename Get<Vals, 1>::Value;
+  using Val = typename GetV<Vals, 0>::Value;
+  using Rest = typename GetV<Vals, 1>::Value;
   using Value = Seq<List<Val, Rest>, CaptureSymbols>;
 };
 
@@ -97,8 +97,8 @@ struct CExprEmptyAct {
 
 template<typename Vals>
 struct UExprRestAct {
-  using Val = typename Get<Vals, 1>::Value;
-  using Rest = typename Get<Vals, 2>::Value;
+  using Val = typename GetV<Vals, 1>::Value;
+  using Rest = typename GetV<Vals, 2>::Value;
   using Value = List<Val, Rest>;
 };
 
@@ -109,8 +109,8 @@ struct UExprRestEmptyAct {
 
 template<typename Vals>
 struct UExprAct {
-  using Val = typename Get<Vals, 0>::Value;
-  using Rest = typename Get<Vals, 1>::Value;
+  using Val = typename GetV<Vals, 0>::Value;
+  using Rest = typename GetV<Vals, 1>::Value;
   struct This {
     using Type = NonTerminal<UExpr, OneOf<List<Val, Rest>>>;
   };
@@ -119,7 +119,7 @@ struct UExprAct {
 
 template<typename Vals>
 struct ExtractRE {
-  using Value = CreateList<typename Get<Vals, 0>::Value>;
+  using Value = CreateList<typename GetV<Vals, 0>::Value>;
 };
 
 // }} Actions

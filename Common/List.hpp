@@ -50,17 +50,17 @@ template<typename T, typename L>
 using ConsIfNotNilV = typename ConsIfNotNil<T, L>::Value;
 
 template<typename L, int N>
-struct GetImpl {
-  using Value = typename GetImpl<typename L::Tail, N - 1>::Value;
+struct Get {
+  using Value = typename Get<typename L::Tail, N - 1>::Value;
 };
 
 template<typename L>
-struct GetImpl<L, 0> {
+struct Get<L, 0> {
   using Value = typename L::Head;
 };
 
 template<typename L, int N>
-using Get = typename GetImpl<L, N>::Value;
+using GetV = typename Get<L, N>::Value;
 
 template<typename L, template<typename> typename F>
 struct MapImpl {

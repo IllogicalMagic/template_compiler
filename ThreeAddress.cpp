@@ -169,40 +169,40 @@ struct IdRef {
 // Parser actions {{
 template<typename Vals>
 struct InstsAction {
-  using Lhs = typename Get<Vals, 0>::Value;
-  using Rhs = typename Get<Vals, 1>::Value;
+  using Lhs = typename GetV<Vals, 0>::Value;
+  using Rhs = typename GetV<Vals, 1>::Value;
   using Value = List<Lhs, Rhs>;
 };
 
 template<typename Vals>
 struct IfAction {
-  using Cond = typename Get<Vals, 2>::Value;
-  using TrueBr = typename Get<Vals, 4>::Value;
-  using FalseBr = typename Get<Vals, 5>::Value;
+  using Cond = typename GetV<Vals, 2>::Value;
+  using TrueBr = typename GetV<Vals, 4>::Value;
+  using FalseBr = typename GetV<Vals, 5>::Value;
   using Value = Tree<IfN, CreateList<Cond, TrueBr, FalseBr> >;
 };
 
 template<typename Vals>
 struct ElseAction {
-  using Value = typename Get<Vals, 1>::Value;
+  using Value = typename GetV<Vals, 1>::Value;
 };
 
 template<typename Vals>
 struct BlockAction {
-  using Value = Tree<Block, typename Get<Vals, 1>::Value>;
+  using Value = Tree<Block, typename GetV<Vals, 1>::Value>;
 };
 
 template<typename Vals>
 struct AssignAction {
-  using Lhs = TreeLeaf<IdRef<typename Get<Vals, 0>::Value> >;
-  using Rhs = typename Get<Vals, 2>::Value;
+  using Lhs = TreeLeaf<IdRef<typename GetV<Vals, 0>::Value> >;
+  using Rhs = typename GetV<Vals, 2>::Value;
   using Value = Tree<Assign, CreateList<Lhs, Rhs> >;
 };
 
 template<typename Vals>
 struct ArithAction {
-  using Lhs = typename Get<Vals, 0>::Value;
-  using Rhs = typename Get<Vals, 1>::Value;
+  using Lhs = typename GetV<Vals, 0>::Value;
+  using Rhs = typename GetV<Vals, 1>::Value;
   using Value = IfV<EqualV<Rhs, Nil>, Lhs, Tree<Arith, List<Lhs, Rhs> > >;
 };
 
@@ -210,26 +210,26 @@ template<typename Op>
 struct ArithRestAction {
   template<typename Vals>
   struct Action {
-    using Lhs = typename Get<Vals, 1>::Value;
+    using Lhs = typename GetV<Vals, 1>::Value;
     using V = Pair<Op, Lhs>;
-    using Rhs = typename Get<Vals, 2>::Value;
+    using Rhs = typename GetV<Vals, 2>::Value;
     using Value = List<V, Rhs>;
   };
 };
 
 template<typename Vals>
 struct NumActionC {
-  using Value = TreeLeaf<NumRef<typename Get<Vals, 0>::Value> >;
+  using Value = TreeLeaf<NumRef<typename GetV<Vals, 0>::Value> >;
 };
 
 template<typename Vals>
 struct IdAction {
-  using Value = TreeLeaf<IdRef<typename Get<Vals, 0>::Value> >;
+  using Value = TreeLeaf<IdRef<typename GetV<Vals, 0>::Value> >;
 };
 
 template<typename Vals>
 struct BracedAction {
-  using Value = typename Get<Vals, 1>::Value;
+  using Value = typename GetV<Vals, 1>::Value;
 };
 
 // }} Parser actions
@@ -364,8 +364,8 @@ struct CodeGen<Nil, S> {
 template<typename Vals, typename S>
 struct CodeGen<Tree<Assign, Vals>, S> {
   using State = S;
-  using Lhs = typename Get<Vals, 0>::Value;
-  using Rhs = CodeGen<Get<Vals, 1>, S>;
+  using Lhs = typename GetV<Vals, 0>::Value;
+  using Rhs = CodeGen<GetV<Vals, 1>, S>;
   using AssignInst = Inst<Assign, CreateList<Lhs, typename Rhs::Ref> >;
   using Insts = ReverseV<List<AssignInst, typename Rhs::Insts> >;
 };
@@ -403,7 +403,7 @@ struct LazyLabelImpl<LAnd, LNum> {
 
 template<typename L, auto LNum>
 struct LazyLabel {
-  using Value = typename LazyLabelImpl<typename Get<L, 1>::First, LNum>::Value;
+  using Value = typename LazyLabelImpl<typename GetV<L, 1>::First, LNum>::Value;
 };
 
 template<auto LNum>
@@ -440,7 +440,7 @@ template<typename Vals, typename S>
 struct CodeGen<Tree<Arith, Vals>, S> {
   // Lhs {{
   using ReduceState = CodeGenState<S::TmpNum, S::LabelNum + 1>;
-  using Lhs = CodeGen<Get<Vals, 0>, ReduceState >;
+  using Lhs = CodeGen<GetV<Vals, 0>, ReduceState >;
   using LhsI = IfV<EqualV<TmpRef<S::TmpNum>, typename Lhs::Ref>,
                    Nil,
                    Inst<Assign, CreateList<TmpRef<S::TmpNum>, typename Lhs::Ref> > >;
@@ -598,36 +598,36 @@ template<typename I>
 struct PrintInstImpl {
   using Ops = typename I::Vals;
   using Op = typename PrintOpType<typename I::Op>::Value;
-  using Out = typename PrintOp<Get<Ops, 0> >::Value;
-  using In1 = typename PrintOp<Get<Ops, 1> >::Value;
-  using In2 = typename PrintOp<Get<Ops, 2> >::Value;
+  using Out = typename PrintOp<GetV<Ops, 0> >::Value;
+  using In1 = typename PrintOp<GetV<Ops, 1> >::Value;
+  using In2 = typename PrintOp<GetV<Ops, 2> >::Value;
   using Value = FlattenV<CreateList<Out, WS, Asn, WS, In1, WS, Op, WS, In2, EndL> >;
 };
 
 template<typename Ops>
 struct PrintInstImpl<Inst<Assign, Ops> > {
-  using Lhs = typename PrintOp<Get<Ops, 0> >::Value;
-  using Rhs = typename PrintOp<Get<Ops, 1> >::Value;
+  using Lhs = typename PrintOp<GetV<Ops, 0> >::Value;
+  using Rhs = typename PrintOp<GetV<Ops, 1> >::Value;
   using Value = FlattenV<CreateList<Lhs, WS, Asn, WS, Rhs, EndL> >;
 };
 
 template<typename Ops>
 struct PrintInstImpl<Inst<GoToFalse, Ops> > {
-  using C = typename PrintOp<Get<Ops, 0> >::Value;
-  using L = typename PrintOp<Get<Ops, 1> >::Value;
+  using C = typename PrintOp<GetV<Ops, 0> >::Value;
+  using L = typename PrintOp<GetV<Ops, 1> >::Value;
   using Value = FlattenV<CreateList<GoToFalseP, WS, C, CommaP, WS, L, EndL> >;
 };
 
 template<typename Ops>
 struct PrintInstImpl<Inst<GoToTrue, Ops> > {
-  using C = typename PrintOp<Get<Ops, 0> >::Value;
-  using L = typename PrintOp<Get<Ops, 1> >::Value;
+  using C = typename PrintOp<GetV<Ops, 0> >::Value;
+  using L = typename PrintOp<GetV<Ops, 1> >::Value;
   using Value = FlattenV<CreateList<GoToTrueP, WS, C, CommaP, WS, L, EndL> >;
 };
 
 template<typename Ops>
 struct PrintInstImpl<Inst<GoTo, Ops> > {
-  using L = typename PrintOp<Get<Ops, 0> >::Value;
+  using L = typename PrintOp<GetV<Ops, 0> >::Value;
   using Value = FlattenV<CreateList<GoToP, WS, L, EndL> >;
 };
 

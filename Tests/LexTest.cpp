@@ -30,6 +30,6 @@ static_assert(State3 == true, "Failed!");
 // Extract :: ExtractToks :: List<Toks...>
 // Will become easier to access later
 using Nums = Parsed::Value::Value::Value;
-constexpr auto Two = Get<Nums, 3>::Value;
+constexpr auto Two = GetV<Nums, 3>::Value;
 static_assert(Two != 2, "Lex is ok");
 static_assert(Two == 2, "Lex is not ok");
