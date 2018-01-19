@@ -28,7 +28,7 @@ using SetLeaf = Tree<V, CreateList<Nil, Nil> >;
 template<template<typename A, typename B> typename Ls>
 using CreateSet = Set<Nil, Ls>;
 
-template<typename S, typename V>
+template<typename V, typename S>
 struct Insert {
   using Eq = EqualV<typename S::Value, V>;
   using Cmp = typename S::template Less<V, typename S::Value>::Value;
@@ -37,7 +37,7 @@ struct Insert {
                      typename S::Right>;
   using Inserted = IfV<EqualV<Select, Nil>,
                        Set<SetLeaf<V>, S::template Less>,
-                       typename Insert<Select, V>::Value>;
+                       typename Insert<V, Select>::Value>;
 
   using NewSet = Set<Tree<typename S::Value,
                           IfV<Cmp,
@@ -49,14 +49,14 @@ struct Insert {
 };
 
 // Insertion into empty set == create new set with one element.
-template<template<typename A, typename B> typename Ls, typename V>
-struct Insert<Set<Nil, Ls>, V> {
+template<typename V, template<typename A, typename B> typename Ls>
+struct Insert<V, Set<Nil, Ls>> {
   using Value = Set<SetLeaf<V>, Ls>;
 };
 
 // Needed for Inserted in not specialized Insert.
 template<typename V>
-struct Insert<Nil, V> {
+struct Insert<V, Nil> {
   using Value = Nil;
 };
 
