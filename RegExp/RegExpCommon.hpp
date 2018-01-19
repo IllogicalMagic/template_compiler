@@ -7,6 +7,8 @@
 #ifndef TEMPLATE_REGEXP_COMMON_HPP_INCLUDED
 #define TEMPLATE_REGEXP_COMMON_HPP_INCLUDED
 
+#include "Grammar/GrammarBuilder.hpp"
+
 // RegExp grammar builder {{
 
 struct Union;
