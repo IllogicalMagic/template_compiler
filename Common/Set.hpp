@@ -63,4 +63,27 @@ struct Insert<V, Nil> {
 template<typename S, typename V>
 using InsertV = typename Insert<S, V>::Value;
 
+template<template<typename, typename> typename F, typename V, typename SV,
+         template<typename, typename> typename Ls>
+struct FoldL<F, V, Set<SV, Ls> > {
+  using S = Set<SV, Ls>;
+  using LeftF = typename FoldL<F, V, typename S::Left>::Value;
+  using ValF = typename F<typename S::Value, LeftF>::Value;
+  using Value = typename FoldL<F, ValF, typename S::Right>::Value;
+};
+
+template<template<typename, typename> typename F, typename V,
+         template<typename, typename> typename Ls>
+struct FoldL<F, V, Set<Nil, Ls> > {
+  using Value = V;
+};
+
+template<typename A, typename B>
+struct SetUnion {
+  using Value = FoldLV<Insert, A, B>;
+};
+
+template<typename A, typename B>
+using SetUnionV = typename SetUnion<A, B>::Value;
+
 #endif

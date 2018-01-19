@@ -24,3 +24,14 @@ static_assert(!std::is_same<S4, S5>::value, "Test 4 failed! Element is not inser
 using S6 = InsertV<short, S5>;
 using S7 = InsertV<char, S6>;
 static_assert(!std::is_same<S7, S6>::value, "Test 5 failed! Element is not inserted");
+
+using S8 = InsertV<short, S1>;
+using S9 = SetUnionV<S5, S8>;
+static_assert(std::is_same<S6, S9>::value, "Test 6 failed! It is not a union");
+
+// Test 7 will fail in case of SetUnionV<S10, S5>
+// because structure of trees will be different.
+// But they will contain same elements anyway.
+using S10 = InsertV<bool, S8>;
+using S11 = SetUnionV<S5, S10>;
+static_assert(std::is_same<S6, S11>::value, "Test 7 failed! It is not a union");
