@@ -26,13 +26,14 @@ struct ClExprRestAct {
 };
 
 template<typename Vals>
-struct ClExprRestActPass {
+struct ClExprRestPassAct {
   using Value = Nil;
 };
 
 template<typename Vals>
 struct ClExprAct {
-  using HasClosure = EqualV<GetV<Vals, 1>, Closure>;
+  using Val = typename GetV<Vals, 1>::Value;
+  using HasClosure = EqualV<Val, Closure>;
   using Prim = typename GetV<Vals, 0>::Value;
   using Value = IfV<HasClosure,
                     Tree<Closure, CreateList<Prim > >,
@@ -51,7 +52,6 @@ struct CExprRestEmptyAct {
 
 template<typename Vals>
 struct CExprAct {
-  // using Lhs = typename GetV<Vals, 0>::Value;
   using Lhs = typename GetV<Vals, 0>::Value;
   using Rhs = typename GetV<Vals, 1>::Value;
   using Last = EqualV<Rhs, Nil>;
