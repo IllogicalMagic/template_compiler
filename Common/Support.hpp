@@ -29,6 +29,32 @@ struct Not<False> {
 template<typename T>
 using NotV = typename Not<T>::Value;
 
+template<typename L, typename R>
+struct And {
+  using Value = False;
+};
+
+template<>
+struct And<True, True> {
+  using Value = True;
+};
+
+template<typename L, typename R>
+using AndV = typename And<L, R>::Value;
+
+template<typename L, typename R>
+struct Or {
+  using Value = True;
+};
+
+template<>
+struct And<False, False> {
+  using Value = False;
+};
+
+template<typename L, typename R>
+using OrV = typename Or<L, R>::Value;
+
 // Equality test
 template<typename T, typename U>
 struct Equal {
