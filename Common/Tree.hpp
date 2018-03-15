@@ -24,4 +24,22 @@ struct FoldL<F, V, Tree<TV, TC> > {
   using Value = typename F<TV, FChilds>::Value;
 };
 
+template<template<typename, typename> typename F, typename T>
+struct PostOrderTraversal {
+  template<typename T1>
+  using ThisTraversal = PostOrderTraversal<F, T1>;
+
+  using NewChilds = Map<typename T::Childs, ThisTraversal>;
+  using NewVal = typename F<typename T::Value, NewChilds>::Value;
+  using Value = Tree<NewVal, NewChilds>;
+};
+
+template<template<typename, typename> typename F, typename V>
+struct PostOrderTraversal<F, TreeLeaf<V>> {
+  using Value = TreeLeaf<typename F<V, Nil>::Value>;
+};
+
+template<template<typename, typename> typename F, typename T>
+using PostOrderTraversalV = typename PostOrderTraversal<F, T>::Value;
+
 #endif
