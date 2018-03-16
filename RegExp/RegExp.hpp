@@ -4,6 +4,8 @@
 #include "RegExp/RegExpCommon.hpp"
 #include "Common/Tree.hpp"
 
+#include <type_traits>
+
 // AST Builder {{
 struct Concat;
 
@@ -67,8 +69,8 @@ struct CExprEmptyAct {
 
 template<typename Vals>
 struct UExprRestAct {
-  using Lhs = GetV<Vals, 1>;
-  using Rhs = GetV<Vals, 2>;
+  using Lhs = typename GetV<Vals, 1>::Value;
+  using Rhs = typename GetV<Vals, 2>::Value;
   using Last = EqualV<Rhs, Nil>;
   using Value = IfV<Last,
                     Lhs,
@@ -100,5 +102,48 @@ struct ExtractRE {
 // }} AST Builder
 
 using RegExp = Seq<CreateList<UExpr>, ExtractRE>;
+
+// FSM Builder {{
+
+template<typename Num, typename Val>
+struct NumberedNode {
+  using Value = Val;
+  using Number = Num;
+};
+
+template<typename Num, typename Sym>
+struct AssignNumbers {
+  using Value = NumberedNode<Num, Sym>;
+  using Acc = std::integral_constant<typename Num::value_type, Num::value + 1>;
+};
+
+template<typename Num>
+struct AssignNumbers<Num, Empty> {
+  using Value = Empty;
+  using Acc = Num;
+};
+
+template<typename Num>
+struct AssignNumbers<Num, Closure> {
+  using Value = Closure;
+  using Acc = Num;
+};
+
+template<typename Num>
+struct AssignNumbers<Num, Concat> {
+  using Value = Concat;
+  using Acc = Num;
+};
+
+template<typename Num>
+struct AssignNumbers<Num, Union> {
+  using Value = Union;
+  using Acc = Num;
+};
+
+template<typename T>
+using AnnotateAST = typename MapAccumR<AssignNumbers, std::integral_constant<int, 0>, T>::Value;
+
+// }} FSM Builder
 
 #endif
