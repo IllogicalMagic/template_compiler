@@ -42,3 +42,18 @@ constexpr bool State5 = std::is_same<L13, L14>::value;
 static_assert(State5 == false, "Success!");
 static_assert(State5 == true, "Fail!");
 
+template<typename A, typename V>
+struct MAAnd {
+  using Value = AndV<A, V>;
+  using Acc = Value;
+};
+
+using L15 = CreateList<True, False, True>;
+using L16 = CreateList<False, False, True>;
+using MA15 = MapAccumR<MAAnd, True, L15>;
+constexpr bool State6 = std::is_same<typename MA15::Acc, False>::value;
+static_assert(State6 == false, "Success!");
+static_assert(State6 == true, "Fail!");
+constexpr bool State7 = std::is_same<typename MA15::Value, L16>::value;
+static_assert(State7 == false, "Success!");
+static_assert(State7 == true, "Fail!");

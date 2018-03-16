@@ -169,4 +169,21 @@ struct Reverse {
 template<typename L>
 using ReverseV = typename Reverse<L>::Value;
 
+// MapAccumR :: (acc, x -> (acc, y)) -> acc -> [x] -> (acc, [y])
+template<template<typename, typename> typename F, typename V, typename L>
+struct MapAccumR {
+  using NewVal = MapAccumR<F, V, typename L::Tail>;
+  using NewTail = typename NewVal::Value;
+  using NewAcc = typename NewVal::Acc;
+  using NewHeadF = F<NewAcc, typename L::Head>;
+  using Value = ConsV<typename NewHeadF::Value, NewTail>;
+  using Acc = typename NewHeadF::Acc;
+};
+
+template<template<typename, typename> typename F, typename V>
+struct MapAccumR<F, V, Nil> {
+  using Value = Nil;
+  using Acc = V;
+};
+
 #endif

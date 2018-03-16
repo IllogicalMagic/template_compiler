@@ -42,4 +42,20 @@ struct PostOrderTraversal<F, TreeLeaf<V>> {
 template<template<typename, typename> typename F, typename T>
 using PostOrderTraversalV = typename PostOrderTraversal<F, T>::Value;
 
+template<template<typename, typename> typename F, typename V, typename TV, typename TC>
+struct MapAccumR<F, V, Tree<TV, TC> > {
+  template<typename A, typename TNode>
+  struct MapChilds {
+    using M = MapAccumR<F, A, TNode>;
+    using Value = typename M::Value;
+    using Acc = typename M::Acc;
+  };
+
+  using Mapped = MapAccumR<MapChilds, V, TC>;
+  using NewChilds = typename Mapped::Value;
+  using NewValF = F<typename Mapped::Acc, TV>;
+  using Value = Tree<typename NewValF::Value, NewChilds>;
+  using Acc = typename NewValF::Acc;
+};
+
 #endif
