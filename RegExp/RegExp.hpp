@@ -2,6 +2,7 @@
 #define TEMPLATE_REGEXP_FSM_HPP_INCLUDED
 
 #include "RegExp/RegExpCommon.hpp"
+#include "Common/Set.hpp"
 #include "Common/Tree.hpp"
 
 #include <type_traits>
@@ -19,7 +20,7 @@ struct SymbolAct {
 
 template<typename Vals>
 struct BracketAct {
-  using Value = GetV<Vals, 1>;
+  using Value = typename GetV<Vals, 1>::Value;
 };
 
 template<typename Vals>
@@ -105,6 +106,7 @@ using RegExp = Seq<CreateList<UExpr>, ExtractRE>;
 
 // FSM Builder {{
 
+// Tree annotation {{
 template<typename Num, typename Val>
 struct NumberedNode {
   using Value = Val;
@@ -143,6 +145,84 @@ struct AssignNumbers<Num, Union> {
 
 template<typename T>
 using AnnotateAST = typename MapAccumR<AssignNumbers, std::integral_constant<int, 0>, T>::Value;
+// }} Tree annotation
+
+// Set {{
+template<typename A, typename B>
+struct CmpPos {
+  using Value = ToBool<A::Number::value <= B::Number::value>;
+};
+
+template<typename V>
+using FSMSet = Set<V, CmpPos>;
+// }} Set
+
+// Set building {{
+template<typename Sym, typename>
+struct BuildFSMSetsImpl {
+  struct Value {
+    using Nullable = False;
+    using FirstPos = FSMSet<SetLeaf<Sym> >;
+    using LastPos = FirstPos;
+  };
+};
+
+template<typename Childs>
+struct BuildFSMSetsImpl<Empty, Childs> {
+  struct Value {
+    using Nullable = True;
+    using FirstPos = FSMSet<Nil>;
+    using LastPos = FirstPos;
+  };
+};
+
+// FirstPos(*) = FirstPos(c1)
+// FirstPos
+template<typename Childs>
+struct BuildFSMSetsImpl<Closure, Childs> {
+  using Child = typename GetV<Childs, 0>::Value;
+  struct Value {
+    using Nullable = True;
+    using FirstPos = typename Child::FirstPos;
+    using LastPos = FirstPos;
+  };
+};
+
+// FirstPos(|) = FirstPos(c1) + FirstPos(c2)
+// LastPos(|) = FirstPos(c1) + FirstPos(c2)
+template<typename Childs>
+struct BuildFSMSetsImpl<Union, Childs> {
+  using Lhs = typename GetV<Childs, 0>::Value;
+  using Rhs = typename GetV<Childs, 1>::Value;
+  struct Value {
+    using Nullable = OrV<Lhs, Rhs>;
+    using FirstPos = SetUnionV<typename Lhs::FirstPos, typename Rhs::FirstPos>;
+    using LastPos = SetUnionV<typename Lhs::LastPos, typename Rhs::LastPos>;
+  };
+};
+
+// FirstPos(&) = if Nullable(c1) then FirstPos(c1) + FirstPos(c2) else FirstPos(c1)
+// LastPos(&) = if Nullable(c2) then LastPos(c1) + LastPos(c2) else LastPos(c2)
+template<typename Childs>
+struct BuildFSMSetsImpl<Concat, Childs> {
+  using Lhs = typename GetV<Childs, 0>::Value;
+  using Rhs = typename GetV<Childs, 1>::Value;
+  using FPUnion = SetUnionV<typename Lhs::FirstPos, typename Rhs::FirstPos>;
+  using LPUnion = SetUnionV<typename Lhs::LastPos, typename Rhs::LastPos>;
+  struct Value {
+    using Nullable = AndV<Lhs, Rhs>;
+    using FirstPos = IfV<typename Lhs::Nullable,
+                         FPUnion,
+                         typename Lhs::FirstPos>;
+    using LastPos = IfV<typename Rhs::Nullable,
+                        LPUnion,
+                        typename Rhs::LastPos>;
+  };
+};
+
+template<typename AnnotAST>
+using BuildFSMSets = PostOrderTraversalV<BuildFSMSetsImpl, AnnotAST>;
+// }} Set building
 
 // }} FSM Builder
 
