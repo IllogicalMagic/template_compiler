@@ -35,9 +35,9 @@ struct Insert {
   using Select = IfV<Cmp,
                      typename S::Left,
                      typename S::Right>;
-  using Inserted = IfV<EqualV<Select, Nil>,
-                       Set<SetLeaf<V>, S::template Less>,
-                       typename Insert<V, Select>::Value>;
+  using Inserted = typename IfV<EqualV<Select, Nil>,
+                                Id<Set<SetLeaf<V>, S::template Less > >,
+                                Insert<V, Select> >::Value;
 
   using NewSet = Set<Tree<typename S::Value,
                           IfV<Cmp,
@@ -52,12 +52,6 @@ struct Insert {
 template<typename V, template<typename A, typename B> typename Ls>
 struct Insert<V, Set<Nil, Ls>> {
   using Value = Set<SetLeaf<V>, Ls>;
-};
-
-// Needed for Inserted in not specialized Insert.
-template<typename V>
-struct Insert<V, Nil> {
-  using Value = Nil;
 };
 
 template<typename S, typename V>

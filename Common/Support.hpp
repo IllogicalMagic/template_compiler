@@ -97,4 +97,10 @@ struct Flip {
   using Value = This<T, U>;
 };
 
+// Identity function.
+template<typename X>
+struct Id {
+  using Value = X;
+};
+
 #endif
