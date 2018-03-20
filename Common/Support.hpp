@@ -48,7 +48,7 @@ struct Or {
 };
 
 template<>
-struct And<False, False> {
+struct Or<False, False> {
   using Value = False;
 };
 
