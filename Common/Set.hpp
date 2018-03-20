@@ -30,8 +30,10 @@ using CreateSet = Set<Nil, Ls>;
 
 template<typename V, typename S>
 struct Insert {
-  using Eq = EqualV<typename S::Value, V>;
   using Cmp = typename S::template Less<V, typename S::Value>::Value;
+  using CmpInv = typename S::template Less<typename S::Value, V>::Value;
+  using Eq = NotV<OrV<Cmp, CmpInv> >;
+
   using Select = IfV<Cmp,
                      typename S::Left,
                      typename S::Right>;

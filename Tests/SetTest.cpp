@@ -6,7 +6,7 @@
 
 template<typename A, typename B>
 struct Cmp {
-  using Value = ToBool<sizeof(A) <= sizeof(B)>;
+  using Value = ToBool<sizeof(A) < sizeof(B)>;
 };
 
 using S1 = CreateSet<Cmp>;
@@ -23,7 +23,7 @@ static_assert(!std::is_same<S4, S5>::value, "Test 4 failed! Element is not inser
 
 using S6 = InsertV<short, S5>;
 using S7 = InsertV<char, S6>;
-static_assert(!std::is_same<S7, S6>::value, "Test 5 failed! Element is not inserted");
+static_assert(std::is_same<S7, S6>::value, "Test 5 failed! Element is inserted");
 
 using S8 = InsertV<short, S1>;
 using S9 = SetUnionV<S5, S8>;
