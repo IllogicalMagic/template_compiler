@@ -25,8 +25,7 @@ using CreateMap = CreateSet<MapLess<Ls>::template Value>;
 template<template<typename MV, typename InsV> typename F, typename InsP, typename M>
 struct InsertWith {
   using Cmp = typename M::template Less<InsP, typename M::Value>::Value;
-  using CmpInv = typename M::template Less<typename M::Value, InsP>::Value;
-  using Eq = NotV<OrV<Cmp, CmpInv> >;
+  using Eq = EquivV<M::template Less, InsP, typename M::Value>;
 
   using Select = IfV<Cmp,
                      typename M::Left,
@@ -64,6 +63,5 @@ struct InsertWith<F, V, Set<Nil, Ls>> {
 
 template<template<typename, typename> typename F, typename V, typename M>
 using InsertWithV = typename InsertWith<F, V, M>::Value;
-
 
 #endif

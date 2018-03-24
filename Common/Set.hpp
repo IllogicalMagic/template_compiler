@@ -7,6 +7,16 @@
 #include "Common/Support.hpp"
 #include "Common/Tree.hpp"
 
+template<template<typename, typename> typename Ls, typename A, typename B>
+struct Equiv {
+  using Cmp = typename Ls<A, B>::Value;
+  using CmpInv = typename Ls<A, B>::Value;
+  using Value = NotV<OrV<Cmp, CmpInv> >;
+};
+
+template<template<typename, typename> typename Ls, typename A, typename B>
+using EquivV = typename Equiv<Ls, A, B>::Value;
+
 template<typename T, template<typename A, typename B> typename Ls>
 struct Set {
   template<typename A, typename B>
@@ -31,8 +41,7 @@ using CreateSet = Set<Nil, Ls>;
 template<typename V, typename S>
 struct Insert {
   using Cmp = typename S::template Less<V, typename S::Value>::Value;
-  using CmpInv = typename S::template Less<typename S::Value, V>::Value;
-  using Eq = NotV<OrV<Cmp, CmpInv> >;
+  using Eq = EquivV<S::template Less, V, typename S::Value>;
 
   using Select = IfV<Cmp,
                      typename S::Left,
