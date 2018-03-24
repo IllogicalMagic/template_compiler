@@ -21,7 +21,7 @@ struct FoldL<F, V, Tree<TV, TC> > {
   };
 
   using FChilds = typename FoldL<FoldChilds, V, TC>::Value;
-  using Value = typename F<TV, FChilds>::Value;
+  using Value = typename F<FChilds, TV>::Value;
 };
 
 template<template<typename, typename> typename F, typename T>
