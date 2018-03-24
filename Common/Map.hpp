@@ -64,4 +64,29 @@ struct InsertWith<F, V, Set<Nil, Ls>> {
 template<template<typename, typename> typename F, typename V, typename M>
 using InsertWithV = typename InsertWith<F, V, M>::Value;
 
+template<typename K, typename M>
+struct Lookup {
+  // Since map comparator operates only on pairs, attach nothing to K.
+  using FakeVal = MapVal<K, void>;
+
+  using Cmp = typename M::template Less<FakeVal, typename M::Value>::Value;
+  using Eq = EquivV<M::template Less, FakeVal, typename M::Value>;
+
+  // If equivalent, save current node, else prepare of lookups.
+  // After get the value of selected function.
+  using Value = typename IfV<Eq, typename M::Value,
+                    IfV<Cmp, Lookup<K, typename M::Left>,
+                             Lookup<K, typename M::Right>>
+                    >::Value;
+};
+
+// Nothing is found.
+template<typename K>
+struct Lookup<K, Nil> {
+  using Value = Nil;
+};
+
+template<typename K, typename M>
+using LookupV = typename Lookup<K, M>::Value;
+
 #endif

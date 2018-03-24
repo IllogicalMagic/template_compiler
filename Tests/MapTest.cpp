@@ -24,3 +24,8 @@ static_assert(std::is_same<typename S2::Value, MapVal<int, double> >::value, "Te
 using S4 = InsertWithV<Transform, MapVal<int, long>, S3>;
 static_assert(!std::is_same<S3, S4>::value, "Test 3 failed! Not transformed");
 static_assert(std::is_same<typename S4::Value, MapVal<int, long> >::value, "Test 4 failed! Value is not MapVal<int, long>");
+
+using V1 = LookupV<int, S4>;
+static_assert(std::is_same<V1, long>::value, "Test 5 failed! long is not found");
+using V2 = LookupV<bool, S4>;
+static_assert(std::is_same<V2, Nil>::value, "Test 6 failed! Something is found");
