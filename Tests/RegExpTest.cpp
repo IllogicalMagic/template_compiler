@@ -29,7 +29,7 @@ static_assert(std::is_same<typename FSMRoot2::Nullable, False>::value,
 
 template<typename A, typename B>
 struct SumSet {
-  using Value = std::integral_constant<int, A::value + B::Number::value>;
+  using Value = std::integral_constant<int, A::value + B::value>;
 };
 
 template<typename A, typename B, template<typename, typename> typename Ls>
@@ -52,7 +52,6 @@ static_assert(Val2::value == 0, "Wrong FirstPos for '(a|b)*abb'");
 //  5   a    {3,4,5}
 using FollowPos = BuildFollowPos<FSMSets2>;
 
-using Pos5 = NumberedNode<std::integral_constant<int, 5>,
-                          Token<Symbol, std::integral_constant<char, 'a'> > >;
+using Pos5 = std::integral_constant<int, 5>;
 using FollowPos5 = LookupV<Pos5, FollowPos>;
 static_assert(std::is_same<MemberV<Pos5, FollowPos5>, True>::value, "5 is not in followpos(5)");

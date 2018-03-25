@@ -151,7 +151,7 @@ using AnnotateAST = typename MapAccumR<AssignNumbers, std::integral_constant<int
 // Set {{
 template<typename A, typename B>
 struct CmpPos {
-  using Value = ToBool<A::Number::value < B::Number::value>;
+  using Value = ToBool<A::value < B::value>;
 };
 
 template<typename V>
@@ -163,7 +163,7 @@ template<typename Sym, typename>
 struct BuildFSMSetsImpl {
   struct Value {
     using Nullable = False;
-    using FirstPos = FSMSet<SetLeaf<Sym> >;
+    using FirstPos = FSMSet<SetLeaf<typename Sym::Number> >;
     using LastPos = FirstPos;
     using FollowPosLocal = Nil;
   };
