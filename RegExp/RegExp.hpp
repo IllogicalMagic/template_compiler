@@ -2,6 +2,7 @@
 #define TEMPLATE_REGEXP_FSM_HPP_INCLUDED
 
 #include "RegExp/RegExpCommon.hpp"
+#include "Common/Map.hpp"
 #include "Common/Set.hpp"
 #include "Common/Tree.hpp"
 
@@ -150,7 +151,7 @@ using AnnotateAST = typename MapAccumR<AssignNumbers, std::integral_constant<int
 // Set {{
 template<typename A, typename B>
 struct CmpPos {
-  using Value = ToBool<A::Number::value <= B::Number::value>;
+  using Value = ToBool<A::Number::value < B::Number::value>;
 };
 
 template<typename V>
@@ -164,6 +165,7 @@ struct BuildFSMSetsImpl {
     using Nullable = False;
     using FirstPos = FSMSet<SetLeaf<Sym> >;
     using LastPos = FirstPos;
+    using FollowPosLocal = Nil;
   };
 };
 
@@ -173,6 +175,7 @@ struct BuildFSMSetsImpl<Empty, Childs> {
     using Nullable = True;
     using FirstPos = FSMSet<Nil>;
     using LastPos = FirstPos;
+    using FollowPosLocal = Nil;
   };
 };
 
@@ -185,6 +188,11 @@ struct BuildFSMSetsImpl<Closure, Childs> {
     using Nullable = True;
     using FirstPos = typename Child::FirstPos;
     using LastPos = FirstPos;
+
+    // Prepare for building of followpos.
+    template<typename M, typename A>
+    using InsertMapVal = Insert<MapVal<A, FirstPos>, M>;
+    using FollowPosLocal = FoldLV<InsertMapVal, CreateMap<CmpPos>, FirstPos>;
   };
 };
 
@@ -198,6 +206,7 @@ struct BuildFSMSetsImpl<Union, Childs> {
     using Nullable = OrV<Lhs, Rhs>;
     using FirstPos = SetUnionV<typename Lhs::FirstPos, typename Rhs::FirstPos>;
     using LastPos = SetUnionV<typename Lhs::LastPos, typename Rhs::LastPos>;
+    using FollowPosLocal = Nil;
   };
 };
 
@@ -207,21 +216,42 @@ template<typename Childs>
 struct BuildFSMSetsImpl<Concat, Childs> {
   using Lhs = typename GetV<Childs, 0>::Value;
   using Rhs = typename GetV<Childs, 1>::Value;
-  using FPUnion = SetUnionV<typename Lhs::FirstPos, typename Rhs::FirstPos>;
-  using LPUnion = SetUnionV<typename Lhs::LastPos, typename Rhs::LastPos>;
+  using FPUnion = SetUnion<typename Lhs::FirstPos, typename Rhs::FirstPos>;
+  using LPUnion = SetUnion<typename Lhs::LastPos, typename Rhs::LastPos>;
   struct Value {
     using Nullable = AndV<Lhs, Rhs>;
-    using FirstPos = IfV<typename Lhs::Nullable,
-                         FPUnion,
-                         typename Lhs::FirstPos>;
-    using LastPos = IfV<typename Rhs::Nullable,
-                        LPUnion,
-                        typename Rhs::LastPos>;
+    using FirstPos = typename IfV<typename Lhs::Nullable,
+                                  FPUnion,
+                                  Id<typename Lhs::FirstPos>>::Value;
+    using LastPos = typename IfV<typename Rhs::Nullable,
+                                 LPUnion,
+                                 Id<typename Rhs::LastPos>>::Value;
+
+    // Prepare for building of followpos.
+    template<typename M, typename A>
+    using InsertMapVal = Insert<MapVal<A, typename Rhs::FirstPos>, M>;
+    using FollowPosLocal = FoldLV<InsertMapVal, CreateMap<CmpPos>, typename Lhs::LastPos>;
   };
 };
 
 template<typename AnnotAST>
 using BuildFSMSets = PostOrderTraversalV<BuildFSMSetsImpl, AnnotAST>;
+
+// Just merge every pair set from local map into full FollowPos map set for this position.
+template<typename Full, typename V>
+struct MergeFollowPos {
+  using Local = typename V::FollowPosLocal;
+
+  template<typename M, typename Pair>
+  using FoldingF = InsertWith<SetUnion, Pair, M>;
+
+  using Value = typename IfV<EqualV<Local, Nil>,
+                             Id<Full>,
+                             FoldL<FoldingF, Full, Local> >::Value;
+};
+
+template<typename FSMSets>
+using BuildFollowPos = FoldLV<MergeFollowPos, CreateMap<CmpPos>, FSMSets>;
 // }} Set building
 
 // }} FSM Builder

@@ -10,7 +10,7 @@
 template<template<typename, typename> typename Ls, typename A, typename B>
 struct Equiv {
   using Cmp = typename Ls<A, B>::Value;
-  using CmpInv = typename Ls<A, B>::Value;
+  using CmpInv = typename Ls<B, A>::Value;
   using Value = NotV<OrV<Cmp, CmpInv> >;
 };
 
@@ -65,15 +65,15 @@ struct Insert<V, Set<Nil, Ls>> {
   using Value = Set<SetLeaf<V>, Ls>;
 };
 
-template<typename S, typename V>
-using InsertV = typename Insert<S, V>::Value;
+template<typename V, typename S>
+using InsertV = typename Insert<V, S>::Value;
 
 template<template<typename, typename> typename F, typename V, typename SV,
          template<typename, typename> typename Ls>
 struct FoldL<F, V, Set<SV, Ls> > {
   using S = Set<SV, Ls>;
   using LeftF = typename FoldL<F, V, typename S::Left>::Value;
-  using ValF = typename F<typename S::Value, LeftF>::Value;
+  using ValF = typename F<LeftF, typename S::Value>::Value;
   using Value = typename FoldL<F, ValF, typename S::Right>::Value;
 };
 
@@ -85,7 +85,7 @@ struct FoldL<F, V, Set<Nil, Ls> > {
 
 template<typename A, typename B>
 struct SetUnion {
-  using Value = FoldLV<Insert, A, B>;
+  using Value = FoldLV<Flip<Insert>::template Value, A, B>;
 };
 
 template<typename A, typename B>
