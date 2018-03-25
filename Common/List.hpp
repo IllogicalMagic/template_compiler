@@ -200,4 +200,28 @@ struct MapAccumR<F, V, Nil> {
   using Acc = V;
 };
 
+template<template<typename, typename> typename Cmp, typename L1, typename L2>
+struct LexicographicalLess {
+  using Value = typename IfV<typename Cmp<typename L1::Head, typename L2::Head>::Value,
+                             Id<True>,
+                             LexicographicalLess<Cmp,
+                                                 typename L1::Tail,
+                                                 typename L2::Tail>>::Value;
+};
+
+template<template<typename, typename> typename Cmp, typename L2>
+struct LexicographicalLess<Cmp, Nil, L2> {
+  using Value = True;
+};
+
+template<template<typename, typename> typename Cmp, typename L1>
+struct LexicographicalLess<Cmp, L1, Nil> {
+  using Value = False;
+};
+
+template<template<typename, typename> typename Cmp>
+struct LexicographicalLess<Cmp, Nil, Nil> {
+  using Value = False;
+};
+
 #endif
