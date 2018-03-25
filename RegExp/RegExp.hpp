@@ -180,14 +180,14 @@ struct BuildFSMSetsImpl<Empty, Childs> {
 };
 
 // FirstPos(*) = FirstPos(c1)
-// FirstPos
+// LastPos(*) = LastPos(c1)
 template<typename Childs>
 struct BuildFSMSetsImpl<Closure, Childs> {
   using Child = typename GetV<Childs, 0>::Value;
   struct Value {
     using Nullable = True;
     using FirstPos = typename Child::FirstPos;
-    using LastPos = FirstPos;
+    using LastPos = typename Child::LastPos;
 
     // Prepare for building of followpos.
     template<typename M, typename A>
