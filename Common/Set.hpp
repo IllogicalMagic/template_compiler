@@ -91,4 +91,22 @@ struct SetUnion {
 template<typename A, typename B>
 using SetUnionV = typename SetUnion<A, B>::Value;
 
+template<typename V, typename S>
+struct Member {
+  using Cmp = typename S::template Less<V, typename S::Value>::Value;
+  using Eq = EquivV<S::template Less, V, typename S::Value>;
+
+  using Value = IfV<Eq, True,
+                    typename IfV<Cmp, Member<V, typename S::Left>,
+                                 Member<V, typename S::Right>>::Value>;
+};
+
+template<typename V>
+struct Member<V, Nil> {
+  using Value = False;
+};
+
+template<typename V, typename S>
+using MemberV = typename Member<V, S>::Value;
+
 #endif

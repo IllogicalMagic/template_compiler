@@ -35,3 +35,6 @@ static_assert(std::is_same<S6, S9>::value, "Test 6 failed! It is not a union");
 using S10 = InsertV<bool, S8>;
 using S11 = SetUnionV<S5, S10>;
 static_assert(std::is_same<S6, S11>::value, "Test 7 failed! It is not a union");
+
+using A1 = MemberV<char, S7>;
+static_assert(std::is_same<A1, True>::value, "Test 8 failed! Char is not in set");
