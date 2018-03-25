@@ -38,6 +38,9 @@ using SetLeaf = Tree<V, CreateList<Nil, Nil> >;
 template<template<typename A, typename B> typename Ls>
 using CreateSet = Set<Nil, Ls>;
 
+template<typename V, template<typename A, typename B> typename Ls>
+using CreateSet1 = Set<SetLeaf<V>, Ls>;
+
 template<typename V, typename S>
 struct Insert {
   using Cmp = typename S::template Less<V, typename S::Value>::Value;
