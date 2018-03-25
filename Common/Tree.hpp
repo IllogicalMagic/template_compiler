@@ -24,6 +24,17 @@ struct FoldL<F, V, Tree<TV, TC> > {
   using Value = typename F<FChilds, TV>::Value;
 };
 
+template<template<typename, typename> typename F, typename V, typename TV, typename TC>
+struct FoldR<F, V, Tree<TV, TC> > {
+  template<typename A, typename B>
+  struct FoldChilds {
+    using Value = typename FoldR<F, A, B>::Value;
+  };
+
+  using FChilds = typename FoldR<FoldChilds, V, TC>::Value;
+  using Value = typename F<TV, FChilds>::Value;
+};
+
 template<template<typename, typename> typename F, typename T>
 struct PostOrderTraversal {
   template<typename T1>

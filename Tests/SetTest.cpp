@@ -38,3 +38,6 @@ static_assert(std::is_same<S6, S11>::value, "Test 7 failed! It is not a union");
 
 using A1 = MemberV<char, S7>;
 static_assert(std::is_same<A1, True>::value, "Test 8 failed! Char is not in set");
+
+using L1 = ToListV<S7>;
+static_assert(std::is_same<L1, CreateList<bool, short, int>>::value, "Test 9 failed! Not sorted list");

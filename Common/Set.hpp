@@ -83,6 +83,21 @@ struct FoldL<F, V, Set<Nil, Ls> > {
   using Value = V;
 };
 
+template<template<typename, typename> typename F, typename V, typename SV,
+         template<typename, typename> typename Ls>
+struct FoldR<F, V, Set<SV, Ls> > {
+  using S = Set<SV, Ls>;
+  using RightF = typename FoldR<F, V, typename S::Right>::Value;
+  using ValF = typename F<typename S::Value, RightF>::Value;
+  using Value = typename FoldR<F, ValF, typename S::Left>::Value;
+};
+
+template<template<typename, typename> typename F, typename V,
+         template<typename, typename> typename Ls>
+struct FoldR<F, V, Set<Nil, Ls> > {
+  using Value = V;
+};
+
 template<typename A, typename B>
 struct SetUnion {
   using Value = FoldLV<Flip<Insert>::template Value, A, B>;
@@ -108,5 +123,13 @@ struct Member<V, Nil> {
 
 template<typename V, typename S>
 using MemberV = typename Member<V, S>::Value;
+
+template<typename S>
+struct ToList {
+  using Value = FoldRV<Cons, Nil, S>;
+};
+
+template<typename S>
+using ToListV = typename ToList<S>::Value;
 
 #endif

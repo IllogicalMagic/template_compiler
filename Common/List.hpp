@@ -141,8 +141,22 @@ struct FoldL<F, V, Nil> {
   using Value = V;
 };
 
-template<template<typename, typename> typename F, typename V, typename L>
+template<template<typename Acc, typename Elem> typename F, typename V, typename L>
 using FoldLV = typename FoldL<F, V, L>::Value;
+
+template<template<typename, typename> typename F, typename V, typename L>
+struct FoldR {
+  using NewV = typename FoldR<F, V, typename L::Tail>::Value;
+  using Value = typename F<typename L::Head, NewV>::Value;
+};
+
+template<template<typename Elem, typename Acc> typename F, typename V>
+struct FoldR<F, V, Nil> {
+  using Value = V;
+};
+
+template<template<typename, typename> typename F, typename V, typename L>
+using FoldRV = typename FoldR<F, V, L>::Value;
 
 template<typename List>
 struct ToTuple {
