@@ -114,10 +114,13 @@ struct NumberedNode {
   using Number = Num;
 };
 
-template<typename Num, typename Sym>
+template<typename NumAll, typename Sym>
 struct AssignNumbers {
-  using Value = NumberedNode<Num, Sym>;
-  using Acc = std::integral_constant<typename Num::value_type, Num::value + 1>;
+  using Value = NumberedNode<typename NumAll::Num, Sym>;
+  struct Acc {
+    using Num = std::integral_constant<typename NumAll::Num::value_type, NumAll::Num::value + 1>;
+    using All = ConsV<Value, typename NumAll::All>;
+  };
 };
 
 template<typename Num>
@@ -144,8 +147,13 @@ struct AssignNumbers<Num, Union> {
   using Acc = Num;
 };
 
+struct AssignNumbersInit {
+  using Num = std::integral_constant<int, 0>;
+  using All = Nil;
+};
+
 template<typename T>
-using AnnotateAST = typename MapAccumR<AssignNumbers, std::integral_constant<int, 0>, T>::Value;
+using AnnotateAST = MapAccumR<AssignNumbers, AssignNumbersInit, T>;
 // }} Tree annotation
 
 // Set {{

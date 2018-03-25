@@ -8,7 +8,8 @@ using RefAST = Tree<Concat, CreateList<TreeLeaf<Token<Symbol, std::integral_cons
                                        TreeLeaf<FinalSym > > >;
 static_assert(std::is_same<AST, RefAST>::value, "Wrong AST for \"0\"");
 
-using AnnotAST = AnnotateAST<AST>;
+using AnnotASTWithAcc = AnnotateAST<AST>;
+using AnnotAST = typename AnnotASTWithAcc::Value;
 using RefAnnotAST = Tree<Concat,
                     CreateList<TreeLeaf<NumberedNode<
                                           std::integral_constant<int, 1>,
@@ -21,7 +22,8 @@ using FSMSets = BuildFSMSets<AnnotAST>;
 
 // More complex example (from dragon book).
 using AST2 = GetV<decltype("(a|b)*abb"_tre), 0>;
-using AnnotAST2 = AnnotateAST<AST2>;
+using AnnotASTWithAcc2 = AnnotateAST<AST2>;
+using AnnotAST2 = typename AnnotASTWithAcc2::Value;
 using FSMSets2 = BuildFSMSets<AnnotAST2>;
 using FSMRoot2 = typename FSMSets2::Value;
 static_assert(std::is_same<typename FSMRoot2::Nullable, False>::value,
