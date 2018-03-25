@@ -42,4 +42,17 @@ static_assert(Val::value == 12, "Wrong FirstPos for '(a|b)*abb'");
 using Val2 = FoldLV<SumSet, std::integral_constant<int, 0>, FSMRoot2::LastPos>;
 static_assert(Val2::value == 0, "Wrong FirstPos for '(a|b)*abb'");
 
+// AST nodes are numbered from last symbol to first.
+//  n  chr  followpos(n)
+//  0   #       e
+//  1   b      {0}
+//  2   b      {1}
+//  3   a      {2}
+//  4   b    {3,4,5}
+//  5   a    {3,4,5}
 using FollowPos = BuildFollowPos<FSMSets2>;
+
+using Pos5 = NumberedNode<std::integral_constant<int, 5>,
+                          Token<Symbol, std::integral_constant<char, 'a'> > >;
+using FollowPos5 = LookupV<Pos5, FollowPos>;
+static_assert(std::is_same<MemberV<Pos5, FollowPos5>, True>::value, "5 is not in followpos(5)");
