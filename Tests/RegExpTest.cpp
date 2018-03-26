@@ -1,8 +1,9 @@
 #include "Common/StringDivide.hpp"
 #include "Grammar/Grammar.hpp"
+#include "RegExp/FSM.hpp"
 #include "RegExp/RegExp.hpp"
 
-using AST = GetV<decltype("((0))*"_tre), 0>;
+using AST = GetV<decltype("((0))"_tre), 0>;
 
 using RefAST = Tree<Concat, CreateList<TreeLeaf<Token<Symbol, std::integral_constant<char, '0'> > >,
                                        TreeLeaf<FinalSym > > >;
@@ -72,3 +73,13 @@ using Init2 = ToListV<typename FSMRoot2::FirstPos>;
 using FSM2 = typename BuildFSM<Init2,
                                FollowPos2,
                                NumToSym2>::Value;
+
+
+template<typename T>
+struct GetType {
+  using Value = typename T::Type;
+};
+
+using Str = Map<decltype("aaaaaaaaaabababaabaababababababaabb"_tstr), GetType>;
+using FSMI2 = FSMInterpreter<Init2, typename FSM2::Value::FSM, Str>;
+static_assert(std::is_same<typename FSMI2::Value, True>::value, "Not matched!");
