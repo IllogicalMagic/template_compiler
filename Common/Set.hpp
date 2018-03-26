@@ -119,6 +119,11 @@ struct Member {
                                  Member<V, typename S::Right>>::Value>;
 };
 
+template<typename V, template<typename, typename> typename Ls>
+struct Member<V, Set<Nil, Ls>> {
+  using Value = False;
+};
+
 template<typename V>
 struct Member<V, Nil> {
   using Value = False;

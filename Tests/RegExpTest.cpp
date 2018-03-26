@@ -2,7 +2,7 @@
 #include "Grammar/Grammar.hpp"
 #include "RegExp/RegExp.hpp"
 
-using AST = GetV<decltype("((0))"_tre), 0>;
+using AST = GetV<decltype("00*"_tre), 0>;
 
 using RefAST = Tree<Concat, CreateList<TreeLeaf<Token<Symbol, std::integral_constant<char, '0'> > >,
                                        TreeLeaf<FinalSym > > >;
@@ -19,6 +19,13 @@ using RefAnnotAST = Tree<Concat,
                                           FinalSym > > > >;
 static_assert(std::is_same<AnnotAST, RefAnnotAST>::value, "Wrong AnnotAST for \"0\"");
 using FSMSets = BuildFSMSets<AnnotAST>;
+using FollowPos = BuildFollowPos<FSMSets>;
+using NumToSym = FoldRV<Insert, CreateMap<CmpPos>,
+                        typename AnnotASTWithAcc::Acc::All>;
+using Init = ToListV<typename FSMSets::Value::FirstPos>;
+using FSM = BuildFSM<Init,
+                     FollowPos,
+                     NumToSym>;
 
 // More complex example (from dragon book).
 using AST2 = GetV<decltype("(a|b)*abb"_tre), 0>;
@@ -52,8 +59,16 @@ static_assert(Val2::value == 0, "Wrong FirstPos for '(a|b)*abb'");
 //  3   a      {2}
 //  4   b    {3,4,5}
 //  5   a    {3,4,5}
-using FollowPos = BuildFollowPos<FSMSets2>;
+using FollowPos2 = BuildFollowPos<FSMSets2>;
 
 using Pos5 = std::integral_constant<int, 5>;
-using FollowPos5 = LookupV<Pos5, FollowPos>;
+using FollowPos5 = LookupV<Pos5, FollowPos2>;
 static_assert(std::is_same<MemberV<Pos5, FollowPos5>, True>::value, "5 is not in followpos(5)");
+
+using NumToSym2 = FoldRV<Insert, CreateMap<CmpPos>,
+                         typename AnnotASTWithAcc2::Acc::All>;
+
+using Init2 = ToListV<typename FSMRoot2::FirstPos>;
+using FSM2 = typename BuildFSM<Init2,
+                               FollowPos2,
+                               NumToSym2>::Value;
