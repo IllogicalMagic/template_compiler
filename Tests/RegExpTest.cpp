@@ -2,7 +2,7 @@
 #include "Grammar/Grammar.hpp"
 #include "RegExp/RegExp.hpp"
 
-using AST = GetV<decltype("00*"_tre), 0>;
+using AST = GetV<decltype("((0))*"_tre), 0>;
 
 using RefAST = Tree<Concat, CreateList<TreeLeaf<Token<Symbol, std::integral_constant<char, '0'> > >,
                                        TreeLeaf<FinalSym > > >;
