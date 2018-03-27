@@ -10,7 +10,8 @@
 
 // AST Builder {{
 struct Concat;
-
+// No symbol.
+struct Epsilon;
 // (r)#, where # is FinalSym.
 struct FinalSym;
 
@@ -66,7 +67,7 @@ struct CExprAct {
 
 template<typename Vals>
 struct CExprEmptyAct {
-  using Value = Empty;
+  using Value = TreeLeaf<Epsilon>;
 };
 
 template<typename Vals>
@@ -124,8 +125,8 @@ struct AssignNumbers {
 };
 
 template<typename Num>
-struct AssignNumbers<Num, Empty> {
-  using Value = Empty;
+struct AssignNumbers<Num, Epsilon> {
+  using Value = Epsilon;
   using Acc = Num;
 };
 
@@ -178,7 +179,7 @@ struct BuildFSMSetsImpl {
 };
 
 template<typename Childs>
-struct BuildFSMSetsImpl<Empty, Childs> {
+struct BuildFSMSetsImpl<Epsilon, Childs> {
   struct Value {
     using Nullable = True;
     using FirstPos = FSMSet<Nil>;
