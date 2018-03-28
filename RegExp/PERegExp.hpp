@@ -124,4 +124,21 @@ struct ExtractRE {
 
 // }} Actions
 
+// UD-literal support {{
+template<typename Parsed>
+struct CheckRE {
+  static constexpr bool State = std::is_same<True, typename Parsed::State>::value;
+  static_assert(State == true, "Bad regexp");
+  using Value = typename Parsed::Value::Value;
+};
+
+using RegExp = Seq<CreateList<UExpr>, ExtractRE>;
+
+template<typename T>
+struct CreateRegExpImpl {
+  using Value = typename CheckRE<Parse<RegExp, T> >::Value;
+};
+
+// }} UD-literal support
+
 #endif

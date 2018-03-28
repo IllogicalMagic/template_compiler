@@ -3,7 +3,7 @@
 #include "RegExp/FSM.hpp"
 #include "RegExp/RegExp.hpp"
 
-using AST = GetV<decltype("((0))"_tre), 0>;
+using AST = GetV<decltype("((0))"_treAST), 0>;
 
 using RefAST = Tree<Concat, CreateList<TreeLeaf<Token<Symbol, std::integral_constant<char, '0'> > >,
                                        TreeLeaf<FinalSym > > >;
@@ -29,7 +29,7 @@ using FSM = BuildFSM<Init,
                      NumToSym>;
 
 // More complex example (from dragon book).
-using AST2 = GetV<decltype("(a|b)*abb"_tre), 0>;
+using AST2 = GetV<decltype("(a|b)*abb"_treAST), 0>;
 using AnnotASTWithAcc2 = AnnotateAST<AST2>;
 using AnnotAST2 = typename AnnotASTWithAcc2::Value;
 using FSMSets2 = BuildFSMSets<AnnotAST2>;
@@ -81,5 +81,11 @@ struct GetType {
 };
 
 using Str = Map<decltype("aaaaaaaaaabababaabaababababababaabb"_tstr), GetType>;
-using FSMI2 = FSMInterpreter<Init2, typename FSM2::Value::FSM, Str>;
+using FSMI2 = FSMInterpreter<typename FSM2::Value::FSM, Init2, Str>;
 static_assert(std::is_same<typename FSMI2::Value, True>::value, "Not matched!");
+
+// Full test
+using Str2 = Map<decltype("aaaaaccaaaaabababaabaababababababaabb"_tstr), GetType>;
+using RE1 = decltype("(a|b|c)*abb"_tre);
+using M1 = typename RE1::Match<Str2>::Value;
+static_assert(std::is_same<M1, True>::value, "Not matched!");

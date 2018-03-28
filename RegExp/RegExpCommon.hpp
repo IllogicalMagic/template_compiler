@@ -87,8 +87,6 @@ DEF_NTERM(Primal, OneOf<CreateList<
           Seq<CreateList<Symbol>, SymbolAct>>>);
 // }} Grammar
 
-using RegExp = Seq<CreateList<UExpr>, ExtractRE>;
-
 // }} RegExp grammar builder
 
 // RegExp tokenizer {{
@@ -157,27 +155,17 @@ using TokenizeRegExp = typename TokenizeRegExpImpl<T>::Value;
 // }} RegExp tokenizer
 
 // RegExp creator {{
-
-template<typename Parsed>
-struct CheckRE {
-  static constexpr bool State = std::is_same<True, typename Parsed::State>::value;
-  static_assert(State == true, "Bad regexp");
-  // static_assert(State == false, "Success");
-  using Value = typename Parsed::Value::Value;
-};
+template<typename T>
+struct CreateRegExpImpl;
 
 template<typename T>
-auto CreateRegExpImpl2() ->
-  typename CheckRE<Parse<RegExp, T> >::Value;
-
-template<typename T>
-auto CreateRegExpImpl1() ->
-  decltype(CreateRegExpImpl2<TokenizeRegExp<T> >());
+auto CreateRegExp() ->
+  decltype(typename CreateRegExpImpl<TokenizeRegExp<T>>::Value());
 
 // tre -- template regular expression
 template<typename T, T... R>
 auto operator""_tre()
-  -> decltype(CreateRegExpImpl1<CreateList<Const<R>...> >());
+  -> decltype(CreateRegExp<CreateList<Const<R>...> >());
 
 // }} RegExp creator
 

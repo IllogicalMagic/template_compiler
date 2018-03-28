@@ -1,6 +1,7 @@
 #ifndef TEMPLATE_REGEXP_FSM_HPP_INCLUDED
 #define TEMPLATE_REGEXP_FSM_HPP_INCLUDED
 
+#include "RegExp/FSM.hpp"
 #include "RegExp/RegExpCommon.hpp"
 #include "Common/Map.hpp"
 #include "Common/Set.hpp"
@@ -104,7 +105,7 @@ struct ExtractRE {
 
 // }} AST Builder
 
-using RegExp = Seq<CreateList<UExpr>, ExtractRE>;
+using RegExpAST = Seq<CreateList<UExpr>, ExtractRE>;
 
 // FSM Builder {{
 
@@ -370,5 +371,55 @@ struct BuildFSM {
 // }} build FSM
 
 // }} FSM Builder
+
+// UD-literal support {{
+template<typename Parsed>
+struct CheckAST {
+  static constexpr bool State = std::is_same<True, typename Parsed::State>::value;
+  static_assert(State == true, "Bad regexp");
+  using Value = typename Parsed::Value::Value;
+};
+
+template<typename T>
+struct CreateRegExpASTImpl {
+  using AST = typename CheckAST<Parse<RegExpAST, T> >::Value;
+};
+
+template<typename DTran, typename Init>
+struct RegExp {
+  template<typename In>
+  using Match = FSMInterpreter<DTran, Init, In>;
+};
+
+template<typename T>
+struct CreateRegExpImpl {
+  using AST = GetV<typename CheckAST<Parse<RegExpAST, T> >::Value, 0>;
+  using AnnotASTWithAcc = AnnotateAST<AST>;
+  using FSMSets = BuildFSMSets<typename AnnotASTWithAcc::Value>;
+  using FollowPos = BuildFollowPos<FSMSets>;
+  using NumToSym = FoldRV<Insert, CreateMap<CmpPos>,
+                          typename AnnotASTWithAcc::Acc::All>;
+  using Init = ToListV<typename FSMSets::Value::FirstPos>;
+  using FSM = typename BuildFSM<Init,
+                                FollowPos,
+                                NumToSym>::Value;
+  using Value = RegExp<typename FSM::FSM, typename FSM::Init>;
+};
+
+// template<typename T>
+// auto CreateRegExp() ->
+//   typename CreateRegExpImpl<TokenizeRegExp<T>>::Value;
+
+template<typename T>
+auto CreateRegExpAST() ->
+  typename CreateRegExpASTImpl<TokenizeRegExp<T>>::AST;
+
+// treAST -- template regular expression AST
+template<typename T, T... R>
+auto operator""_treAST()
+  -> decltype(CreateRegExpAST<CreateList<Const<R>...> >());
+
+
+// }} UD-literal support
 
 #endif

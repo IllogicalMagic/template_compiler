@@ -40,7 +40,7 @@ struct FSMInterpreterImplFull<DTran, State, Sym, Nil> {
   using Rest = Nil;
 };
 
-template<typename Init, typename DTran, typename In>
+template<typename DTran, typename Init, typename In>
 struct FSMInterpreter {
   using Impl = FSMInterpreterImplFull<DTran, Init, typename In::Head, typename In::Tail>;
   using Value = typename Impl::Value;
