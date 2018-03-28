@@ -1,7 +1,7 @@
 #ifndef TEMPLATE_REGEXP_TEMPLATES_INCLUDED_HPP
 #define TEMPLATE_REGEXP_TEMPLATES_INCLUDED_HPP
 
-#include "RegExp/PERegExp.hpp"
+#include "RegExp/RegExpCommon.hpp"
 
 #define RE_NONZERO_DIGIT "(1|2|3|4|5|6|7|8|9)"_tre
 #define RE_DIGIT "(0|" RE_NONZERO_DIGIT ")"_tre
