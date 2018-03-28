@@ -14,6 +14,19 @@ struct List {
   typedef T Tail;
 };
 
+template<typename L>
+struct Size;
+
+template<>
+struct Size<Nil> {
+  using Value = std::integral_constant<size_t, 0>;
+};
+
+template<typename H, typename T>
+struct Size<List<H, T>> {
+  using Value = std::integral_constant<size_t, 1 + typename Size<T>::Value()>;
+};
+
 template<typename E, typename L>
 struct Cons {
   using Value = List<E, L>;
