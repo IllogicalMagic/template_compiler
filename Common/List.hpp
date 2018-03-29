@@ -237,4 +237,18 @@ struct LexicographicalLess<Cmp, Nil, Nil> {
   using Value = False;
 };
 
+template<template<typename, typename> typename F, typename L1, typename L2>
+struct ZipWith {
+  using Value = List<typename F<typename L1::Head, typename L2::Head>::Value,
+                     typename ZipWith<F, typename L1::Tail, typename L2::Tail>::Value>;
+};
+
+template<template<typename, typename> typename F>
+struct ZipWith<F, Nil, Nil> {
+  using Value = Nil;
+};
+
+template<template<typename, typename> typename F, typename L1, typename L2>
+using ZipWithV = typename ZipWith<F, L1, L2>::Value;
+
 #endif
