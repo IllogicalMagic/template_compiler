@@ -119,4 +119,47 @@ struct BitsetUnion {
 template<typename BS1, typename BS2>
 using BitsetUnionV = typename BitsetUnion<BS1, BS2>::Value;
 
+template<WordType Bit>
+using CreateBitset1 = SetBitV<Bit, CreateList<BitsetWord<0>>>;
+
+template<typename W1, typename W2>
+struct WordCmp {
+  using Value = ToBool<W1::Value::value < W2::Value::value>;
+};
+
+template<typename BS1, typename BS2>
+using BitsetCmp = LexicographicalLess<WordCmp, BS1, BS2>;
+
+template<WordType Bits, int Pos, int Base>
+struct WordToListImpl {
+  using Next = typename WordToListImpl<(Bits >> 1), Pos + 1, Base>::Value;
+  using Value = IfV<ToBool<Bits & 1>,
+                    List<std::integral_constant<int, Base + Pos>, Next>,
+                    Next>;
+};
+
+template<int Pos, int Base>
+struct WordToListImpl<0, Pos, Base> {
+  using Value = Nil;
+};
+
+template<typename BW, WordType Base>
+struct WordToList {
+  using Value = typename WordToListImpl<BW::Value::value, 0, Base>::Value;
+};
+
+
+template<typename BS>
+struct BitsetToList {
+  template<typename A, typename W>
+  struct FoldF {
+    using Value = typename WordToList<W, A::value>::Value;
+    using Acc = std::integral_constant<typename A::value_type, A::value + WordBits>;
+  };
+  using Value = FlattenV<MapAccumRV<FoldF, std::integral_constant<int, 0>, BS>>;
+};
+
+template<typename BS>
+using BitsetToListV = typename BitsetToList<BS>::Value;
+
 #endif

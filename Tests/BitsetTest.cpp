@@ -24,3 +24,10 @@ static_assert(std::is_same<TestBitV<31, S7>, True>::value, "Bit 31 is not saved"
 static_assert(std::is_same<TestBitV<63, S7>, True>::value, "Bit 63 is not saved");
 static_assert(std::is_same<TestBitV<88, S7>, True>::value, "Bit 88 is not saved");
 static_assert(std::is_same<TestBitV<97, S7>, True>::value, "Bit 97 is not saved");
+
+using L1 = BitsetToListV<S7>;
+using L2 = CreateList<std::integral_constant<int, 97>,
+                      std::integral_constant<int, 88>,
+                      std::integral_constant<int, 63>,
+                      std::integral_constant<int, 31>>;
+static_assert(std::is_same<L1, L2>::value, "Wrong list");

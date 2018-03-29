@@ -213,6 +213,9 @@ struct MapAccumR<F, V, Nil> {
   using Acc = V;
 };
 
+template<template<typename, typename> typename F, typename V, typename L>
+using MapAccumRV = typename MapAccumR<F, V, L>::Value;
+
 template<template<typename, typename> typename Cmp, typename L1, typename L2>
 struct LexicographicalLess {
   using Value = typename IfV<typename Cmp<typename L1::Head, typename L2::Head>::Value,
