@@ -97,4 +97,26 @@ struct TestBit : BitOpBase<Bit, Bitset> {
 template<WordType Bit, typename Bitset>
 using TestBitV = typename TestBit<Bit, Bitset>::Value;
 
+template<typename W1, typename W2>
+struct BitsetWordUnion {
+  using Value = BitsetWord<typename W1::Value() | typename W2::Value()>;
+};
+
+template<typename BS1, typename BS2>
+struct BitsetUnionImpl {
+  using BS2Grow = typename GrowBitset<typename Size<BS1>::Value() -
+                                      typename Size<BS2>::Value(), BS2>::Value;
+  using Value = typename ZipWith<BitsetWordUnion, BS1, BS2Grow>::Value;
+};
+
+template<typename BS1, typename BS2>
+struct BitsetUnion {
+  using Value = typename IfV<ToBool<typename Size<BS1>::Value() < typename Size<BS2>::Value()>,
+                             BitsetUnion<BS2, BS1>,
+                             BitsetUnionImpl<BS1, BS2>>::Value;
+};
+
+template<typename BS1, typename BS2>
+using BitsetUnionV = typename BitsetUnion<BS1, BS2>::Value;
+
 #endif

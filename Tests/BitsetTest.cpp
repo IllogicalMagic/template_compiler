@@ -16,3 +16,11 @@ static_assert(std::is_same<TestBitV<31, S3>, True>::value, "Bit 31 is not saved"
 
 using S4 = ResetBitV<97, S3>;
 static_assert(std::is_same<TestBitV<97, S4>, False>::value, "Bit 97 is not reset");
+
+using S5 = SetBitV<63, S1>;
+using S6 = SetBitV<88, S5>;
+using S7 = BitsetUnionV<S6, S3>;
+static_assert(std::is_same<TestBitV<31, S7>, True>::value, "Bit 31 is not saved");
+static_assert(std::is_same<TestBitV<63, S7>, True>::value, "Bit 63 is not saved");
+static_assert(std::is_same<TestBitV<88, S7>, True>::value, "Bit 88 is not saved");
+static_assert(std::is_same<TestBitV<97, S7>, True>::value, "Bit 97 is not saved");
