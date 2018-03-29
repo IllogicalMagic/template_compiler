@@ -89,8 +89,8 @@ struct TestBit : BitOpBase<Bit, Bitset> {
   using typename BitOpBase<Bit, Bitset>::IsInside;
 
   using Word = typename IfV<IsInside,
-                            Get<Bitset, BSize - WordIndex - 1>,
-                            Id<Nil>>::Value;
+                            Get<Bitset, (unsigned) BSize - WordIndex - 1>,
+                            Id<BitsetWord<0>>>::Value;
   using Value = ToBool<(typename Word::Value() & (1 << BitIndex)) != 0>;
 };
 
