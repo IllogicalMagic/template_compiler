@@ -6,19 +6,20 @@
 #include "Common/Types.hpp"
 
 #include <type_traits>
+#include <cstdint>
 
-using WordType = unsigned;
+using WordType = uint64_t;
 
 constexpr WordType WordBits = sizeof(WordType) * 8;
 
-template<int N>
+template<WordType N>
 constexpr auto Log2 = Log2<(N >> 1)> + 1;
 
 template<>
-constexpr auto Log2<1> = 0;
+constexpr auto Log2<1> = (WordType)0;
 
 constexpr auto WordLog = Log2<WordBits>;
-constexpr WordType WordMask = (1u << WordLog) - 1;
+constexpr WordType WordMask = ((WordType)1 << WordLog) - 1;
 
 template<WordType Val>
 struct BitsetWord {
@@ -57,7 +58,7 @@ struct SetBit : BitOpBase<Bit, Bitset> {
   using Resized = typename IfV<IsOutside,
                                GrowBitset<WordIndex - BSize + 1, Bitset>,
                                Id<Bitset>>::Value;
-  using NewVal = BitsetWord<typename Resized::Head::Value() | (1 << BitIndex)>;
+  using NewVal = BitsetWord<typename Resized::Head::Value() | ((WordType)1 << BitIndex)>;
   using Value = List<NewVal, typename Resized::Tail>;
 };
 
@@ -74,7 +75,7 @@ struct ResetBit : BitOpBase<Bit, Bitset> {
   using Resized = typename IfV<IsOutside,
                                GrowBitset<WordIndex - BSize + 1, Bitset>,
                                Id<Bitset>>::Value;
-  using NewVal = BitsetWord<typename Resized::Head::Value() & ~(1 << BitIndex)>;
+  using NewVal = BitsetWord<typename Resized::Head::Value() & ~((WordType)1 << BitIndex)>;
   using Value = List<NewVal, typename Resized::Tail>;
 };
 
@@ -91,7 +92,7 @@ struct TestBit : BitOpBase<Bit, Bitset> {
   using Word = typename IfV<IsInside,
                             Get<Bitset, (unsigned) BSize - WordIndex - 1>,
                             Id<BitsetWord<0>>>::Value;
-  using Value = ToBool<(typename Word::Value() & (1 << BitIndex)) != 0>;
+  using Value = ToBool<(typename Word::Value() & ((WordType)1 << BitIndex)) != 0>;
 };
 
 template<WordType Bit, typename Bitset>
