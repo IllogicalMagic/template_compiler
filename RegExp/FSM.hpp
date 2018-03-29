@@ -1,6 +1,7 @@
 #ifndef TEMPLATE_FSM_INTERPRETER_HPP_INCLUDED
 #define TEMPLATE_FSM_INTERPRETER_HPP_INCLUDED
 
+#include "Common/Bitset.hpp"
 #include "Common/List.hpp"
 #include "Common/Map.hpp"
 #include "Common/Support.hpp"
@@ -24,7 +25,7 @@ struct FSMInterpreterImplFull {
 
 template<typename T>
 struct CheckFinal {
-  using Value = ToBool<T::Head::value == 0>;
+  using Value = TestBitV<0, T>;
 };
 
 template<>

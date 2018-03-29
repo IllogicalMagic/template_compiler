@@ -160,7 +160,7 @@ struct CreateRegExpImpl;
 
 template<typename T>
 auto CreateRegExp() ->
-  decltype(typename CreateRegExpImpl<TokenizeRegExp<T>>::Value());
+  typename CreateRegExpImpl<TokenizeRegExp<T>>::Value;
 
 // tre -- template regular expression
 template<typename T, T... R>

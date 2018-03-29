@@ -3,6 +3,7 @@
 
 #include "RegExp/FSM.hpp"
 #include "RegExp/RegExpCommon.hpp"
+#include "Common/Bitset.hpp"
 #include "Common/Map.hpp"
 #include "Common/Set.hpp"
 #include "Common/Tree.hpp"
@@ -164,8 +165,10 @@ struct CmpPos {
   using Value = ToBool<A::value < B::value>;
 };
 
-template<typename V>
-using FSMSet = Set<V, CmpPos>;
+template<WordType Bit>
+using FSMSet = CreateBitset1<Bit>;
+using FSMSetEmpty = CreateBitset;
+
 // }} Set
 
 // Set building {{
@@ -173,7 +176,7 @@ template<typename Sym, typename>
 struct BuildFSMSetsImpl {
   struct Value {
     using Nullable = False;
-    using FirstPos = FSMSet<SetLeaf<typename Sym::Number> >;
+    using FirstPos = FSMSet<Sym::Number::value>;
     using LastPos = FirstPos;
     using FollowPosLocal = Nil;
   };
@@ -183,7 +186,7 @@ template<typename Childs>
 struct BuildFSMSetsImpl<Epsilon, Childs> {
   struct Value {
     using Nullable = True;
-    using FirstPos = FSMSet<Nil>;
+    using FirstPos = FSMSetEmpty;
     using LastPos = FirstPos;
     using FollowPosLocal = Nil;
   };
@@ -202,7 +205,8 @@ struct BuildFSMSetsImpl<Closure, Childs> {
     // Prepare for building of followpos.
     template<typename M, typename A>
     using InsertMapVal = Insert<MapVal<A, FirstPos>, M>;
-    using FollowPosLocal = FoldLV<InsertMapVal, CreateMap<CmpPos>, FirstPos>;
+    using FirstPosL = BitsetToListV<FirstPos>;
+    using FollowPosLocal = FoldLV<InsertMapVal, CreateMap<CmpPos>, FirstPosL>;
   };
 };
 
@@ -214,8 +218,8 @@ struct BuildFSMSetsImpl<Union, Childs> {
   using Rhs = typename GetV<Childs, 1>::Value;
   struct Value {
     using Nullable = OrV<typename Lhs::Nullable, typename Rhs::Nullable>;
-    using FirstPos = SetUnionV<typename Lhs::FirstPos, typename Rhs::FirstPos>;
-    using LastPos = SetUnionV<typename Lhs::LastPos, typename Rhs::LastPos>;
+    using FirstPos = BitsetUnionV<typename Lhs::FirstPos, typename Rhs::FirstPos>;
+    using LastPos = BitsetUnionV<typename Lhs::LastPos, typename Rhs::LastPos>;
     using FollowPosLocal = Nil;
   };
 };
@@ -226,8 +230,8 @@ template<typename Childs>
 struct BuildFSMSetsImpl<Concat, Childs> {
   using Lhs = typename GetV<Childs, 0>::Value;
   using Rhs = typename GetV<Childs, 1>::Value;
-  using FPUnion = SetUnion<typename Lhs::FirstPos, typename Rhs::FirstPos>;
-  using LPUnion = SetUnion<typename Lhs::LastPos, typename Rhs::LastPos>;
+  using FPUnion = BitsetUnion<typename Lhs::FirstPos, typename Rhs::FirstPos>;
+  using LPUnion = BitsetUnion<typename Lhs::LastPos, typename Rhs::LastPos>;
   struct Value {
     using Nullable = AndV<typename Lhs::Nullable, typename Rhs::Nullable>;
     using FirstPos = typename IfV<typename Lhs::Nullable,
@@ -240,7 +244,8 @@ struct BuildFSMSetsImpl<Concat, Childs> {
     // Prepare for building of followpos.
     template<typename M, typename A>
     using InsertMapVal = Insert<MapVal<A, typename Rhs::FirstPos>, M>;
-    using FollowPosLocal = FoldLV<InsertMapVal, CreateMap<CmpPos>, typename Lhs::LastPos>;
+    using LastPosL = BitsetToListV<typename Lhs::LastPos>;
+    using FollowPosLocal = FoldLV<InsertMapVal, CreateMap<CmpPos>, LastPosL>;
   };
 };
 
@@ -253,7 +258,7 @@ struct MergeFollowPos {
   using Local = typename V::FollowPosLocal;
 
   template<typename M, typename Pair>
-  using FoldingF = InsertWith<SetUnion, Pair, M>;
+  using FoldingF = InsertWith<BitsetUnion, Pair, M>;
 
   using Value = typename IfV<EqualV<Local, Nil>,
                              Id<Full>,
@@ -266,7 +271,7 @@ using BuildFollowPos = FoldLV<MergeFollowPos, CreateMap<CmpPos>, FSMSets>;
 
 // Final stage -- build FSM {{
 template<typename L1, typename L2>
-using StateCmp = LexicographicalLess<CmpPos, L1, L2>;
+using StateCmp = BitsetCmp<L1, L2>;
 
 template<typename S1, typename S2>
 struct SymCmp {
@@ -301,17 +306,17 @@ struct BuildFSMImpl {
 
       using Value = typename IfV<IsFinal,
                                  Id<SymMap>,
-                                 InsertWith<SetUnion, MapVal<SymVal, PFollowPos>, SymMap>>::Value;
+                                 InsertWith<BitsetUnion, MapVal<SymVal, PFollowPos>, SymMap>>::Value;
     };
 
-    using AllU = FoldLV<GetU, CreateMap<SymCmp>, S>;
+    using AllU = FoldLV<GetU, CreateMap<SymCmp>, BitsetToListV<S>>;
 
     // Then insert (S, Sym) -> U in DTran.
     // Also insert U into next states if it is not marked.
     template<typename FSMAcc2, typename SymUPair>
     struct InsertU {
       using Sym = typename SymUPair::Key;
-      using U = ToListV<typename SymUPair::Value>;
+      using U = typename SymUPair::Value;
       struct Value {
         using FSMMap = InsertV<MapVal<Pair<S, Sym>, U>, typename FSMAcc2::FSMMap>;
         using NextStates = typename IfV<MemberV<U, OldStates1>,
@@ -363,7 +368,7 @@ struct BuildFSM {
   struct Value {
     using Init = InitState;
     using FSM = typename BuildFSMImpl<CreateSet<StateCmp>,
-                                      CreateSet1<InitState, StateCmp>,
+                                      CreateSet1<Init, StateCmp>,
                                       FollowPos, NumToSym,
                                       CreateMap<FSMCmp>>::Value;
   };
@@ -385,10 +390,10 @@ struct CreateRegExpASTImpl {
   using AST = typename CheckAST<Parse<RegExpAST, T> >::Value;
 };
 
-template<typename DTran, typename Init>
+template<typename FSM>
 struct RegExp {
   template<typename In>
-  using Match = FSMInterpreter<DTran, Init, In>;
+  using Match = FSMInterpreter<typename FSM::FSM, typename FSM::Init, In>;
 };
 
 template<typename T>
@@ -403,12 +408,8 @@ struct CreateRegExpImpl {
   using FSM = typename BuildFSM<Init,
                                 FollowPos,
                                 NumToSym>::Value;
-  using Value = RegExp<typename FSM::FSM, typename FSM::Init>;
+  using Value = RegExp<FSM>;
 };
-
-// template<typename T>
-// auto CreateRegExp() ->
-//   typename CreateRegExpImpl<TokenizeRegExp<T>>::Value;
 
 template<typename T>
 auto CreateRegExpAST() ->

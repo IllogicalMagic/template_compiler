@@ -23,7 +23,7 @@ using FSMSets = BuildFSMSets<AnnotAST>;
 using FollowPos = BuildFollowPos<FSMSets>;
 using NumToSym = FoldRV<Insert, CreateMap<CmpPos>,
                         typename AnnotASTWithAcc::Acc::All>;
-using Init = ToListV<typename FSMSets::Value::FirstPos>;
+using Init = typename FSMSets::Value::FirstPos;
 using FSM = BuildFSM<Init,
                      FollowPos,
                      NumToSym>;
@@ -37,21 +37,6 @@ using FSMRoot2 = typename FSMSets2::Value;
 static_assert(std::is_same<typename FSMRoot2::Nullable, False>::value,
               "Wrong nullable for '(a|b)*abb");
 
-template<typename A, typename B>
-struct SumSet {
-  using Value = std::integral_constant<int, A::value + B::value>;
-};
-
-template<typename A, typename B, template<typename, typename> typename Ls>
-struct SumSet<B, Set<SetLeaf<A>, Ls>> {
-  using Value = std::integral_constant<int, A::value + B::value>;
-};
-
-using Val = FoldLV<SumSet, std::integral_constant<int, 0>, FSMRoot2::FirstPos>;
-static_assert(Val::value == 12, "Wrong FirstPos for '(a|b)*abb'");
-using Val2 = FoldLV<SumSet, std::integral_constant<int, 0>, FSMRoot2::LastPos>;
-static_assert(Val2::value == 0, "Wrong FirstPos for '(a|b)*abb'");
-
 // AST nodes are numbered from last symbol to first.
 //  n  chr  followpos(n)
 //  0   #       e
@@ -64,12 +49,12 @@ using FollowPos2 = BuildFollowPos<FSMSets2>;
 
 using Pos5 = std::integral_constant<int, 5>;
 using FollowPos5 = LookupV<Pos5, FollowPos2>;
-static_assert(std::is_same<MemberV<Pos5, FollowPos5>, True>::value, "5 is not in followpos(5)");
+static_assert(std::is_same<TestBitV<Pos5::value, FollowPos5>, True>::value, "5 is not in followpos(5)");
 
 using NumToSym2 = FoldRV<Insert, CreateMap<CmpPos>,
                          typename AnnotASTWithAcc2::Acc::All>;
 
-using Init2 = ToListV<typename FSMRoot2::FirstPos>;
+using Init2 = typename FSMRoot2::FirstPos;
 using FSM2 = typename BuildFSM<Init2,
                                FollowPos2,
                                NumToSym2>::Value;
@@ -81,7 +66,7 @@ struct GetType {
 };
 
 using Str = Map<decltype("aaaaaaaaaabababaabaababababababaabb"_tstr), GetType>;
-using FSMI2 = FSMInterpreter<typename FSM2::Value::FSM, Init2, Str>;
+using FSMI2 = FSMInterpreter<typename FSM2::FSM, Init2, Str>;
 static_assert(std::is_same<typename FSMI2::Value, True>::value, "Not matched!");
 
 // Full test
