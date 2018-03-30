@@ -7,14 +7,10 @@
 
 #include <utility>
 
-template<typename K>
-struct HashKey {
-  using Key = K;
-};
-
 template<typename K, typename V>
-struct HashPair : HashKey<K> {
-  static V getVal(HashKey<K> &&);
+struct HashPair {
+  static True member(K *);
+  static V getVal(K *);
 };
 
 template<typename... Pairs>
@@ -23,6 +19,9 @@ struct Hash;
 template<typename... Ks, typename... Vs>
 struct Hash<MapVal<Ks, Vs>...> : HashPair<Ks, Vs>... {
   using HashPair<Ks, Vs>::getVal...;
+  using HashPair<Ks, Vs>::member...;
+  static False member(...);
+  static Nil getVal(...);
 };
 
 template<template<typename, typename> typename F, typename V, typename... Ks, typename... Vs>
@@ -34,22 +33,12 @@ using CreateHash = Hash<>;
 
 template<typename K, typename... Pairs>
 struct Member<K, Hash<Pairs...> > {
-
-  static auto memberInt(HashKey<K> &&) -> True;
-  static auto memberInt(...) -> False;
-
-  using Value = decltype(memberInt(std::declval<Hash<Pairs...>>()));
+  using Value = decltype(Hash<Pairs...>::member((K *) nullptr));
 };
 
 template<typename K, typename... Pairs>
 struct Lookup<K, Hash<Pairs...> > {
-
-  template<typename X>
-  static auto memberInt(X &&) ->
-    decltype(Hash<Pairs...>::getVal(std::declval<HashKey<X>>()));
-  static auto memberInt(...) -> Nil;
-
-  using Value = decltype(memberInt(std::declval<K>()));
+  using Value = decltype(Hash<Pairs...>::getVal((K *) nullptr));
 };
 
 template<typename K, typename V, typename... Ks, typename... Vs>
