@@ -4,6 +4,7 @@
 #include "Common/Bitset.hpp"
 #include "Common/List.hpp"
 #include "Common/Map.hpp"
+#include "Common/Hash.hpp"
 #include "Common/Support.hpp"
 
 template<typename DTran, typename State, typename Sym, typename InTail>

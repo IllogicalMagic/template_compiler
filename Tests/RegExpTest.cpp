@@ -51,7 +51,7 @@ using Pos5 = std::integral_constant<int, 5>;
 using FollowPos5 = LookupV<Pos5, FollowPos2>;
 static_assert(std::is_same<TestBitV<Pos5::value, FollowPos5>, True>::value, "5 is not in followpos(5)");
 
-using NumToSym2 = FoldRV<Insert, CreateMap<CmpPos>,
+using NumToSym2 = FoldRV<Insert, CreateHash,
                          typename AnnotASTWithAcc2::Acc::All>;
 
 using Init2 = typename FSMRoot2::FirstPos;

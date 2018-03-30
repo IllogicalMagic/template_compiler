@@ -4,6 +4,7 @@
 #include "RegExp/FSM.hpp"
 #include "RegExp/RegExpCommon.hpp"
 #include "Common/Bitset.hpp"
+#include "Common/Hash.hpp"
 #include "Common/Map.hpp"
 #include "Common/Set.hpp"
 #include "Common/Tree.hpp"
@@ -206,7 +207,7 @@ struct BuildFSMSetsImpl<Closure, Childs> {
     template<typename M, typename A>
     using InsertMapVal = Insert<MapVal<A, FirstPos>, M>;
     using FirstPosL = BitsetToListV<FirstPos>;
-    using FollowPosLocal = FoldLV<InsertMapVal, CreateMap<CmpPos>, FirstPosL>;
+    using FollowPosLocal = FoldLV<InsertMapVal, CreateHash, FirstPosL>;
   };
 };
 
@@ -245,7 +246,7 @@ struct BuildFSMSetsImpl<Concat, Childs> {
     template<typename M, typename A>
     using InsertMapVal = Insert<MapVal<A, typename Rhs::FirstPos>, M>;
     using LastPosL = BitsetToListV<typename Lhs::LastPos>;
-    using FollowPosLocal = FoldLV<InsertMapVal, CreateMap<CmpPos>, LastPosL>;
+    using FollowPosLocal = FoldLV<InsertMapVal, CreateHash, LastPosL>;
   };
 };
 
@@ -266,7 +267,7 @@ struct MergeFollowPos {
 };
 
 template<typename FSMSets>
-using BuildFollowPos = FoldLV<MergeFollowPos, CreateMap<CmpPos>, FSMSets>;
+using BuildFollowPos = FoldLV<MergeFollowPos, CreateHash, FSMSets>;
 // }} Set building
 
 // Final stage -- build FSM {{
@@ -309,7 +310,7 @@ struct BuildFSMImpl {
                                  InsertWith<BitsetUnion, MapVal<SymVal, PFollowPos>, SymMap>>::Value;
     };
 
-    using AllU = FoldLV<GetU, CreateMap<SymCmp>, BitsetToListV<S>>;
+    using AllU = FoldLV<GetU, CreateHash, BitsetToListV<S>>;
 
     // Then insert (S, Sym) -> U in DTran.
     // Also insert U into next states if it is not marked.
@@ -370,7 +371,7 @@ struct BuildFSM {
     using FSM = typename BuildFSMImpl<CreateSet<StateCmp>,
                                       CreateSet1<Init, StateCmp>,
                                       FollowPos, NumToSym,
-                                      CreateMap<FSMCmp>>::Value;
+                                      CreateHash>::Value;
   };
 };
 // }} build FSM
