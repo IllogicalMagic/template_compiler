@@ -47,7 +47,17 @@ struct CreateListInt<T> {
 };
 
 template<typename... Args>
-using CreateList = typename CreateListInt<Args...>::Value;
+struct CreateListInt1 {
+  typedef typename CreateListInt<Args...>::Value Value;
+};
+
+template<>
+struct CreateListInt1<> {
+  typedef Nil Value;
+};
+
+template<typename... Args>
+using CreateList = typename CreateListInt1<Args...>::Value;
 
 template<typename T, typename L>
 struct ConsIfNotNil {
